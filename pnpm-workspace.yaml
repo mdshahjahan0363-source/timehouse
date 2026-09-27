@@ -5,6 +5,6 @@ minimumReleaseAgeExclude:
   - next
 
 allowBuilds:
-  - firebase
-  - firebase-admin
-  - '@firebase/*'
+  '@firebase/util': true
+  firebase: true
+  firebase-admin: true
