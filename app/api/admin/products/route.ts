@@ -5,7 +5,7 @@ import {
   ADMIN_COOKIE,
   isValidSessionToken,
 } from "@/admin-auth"
-
+import { SEED_PRODUCTS } from "@/seed"
 async function requireAdmin() {
   const cookieStore = await cookies()
   const token = cookieStore.get(ADMIN_COOKIE)?.value
@@ -16,12 +16,28 @@ async function requireAdmin() {
 // GET — सभी products
 export async function GET() {
   try {
-    const snapshot = await adminDb.collection("products").get()
+    let snapshot = await adminDb.collection("products").get()
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+if (snapshot.empty) {
+  const batch = adminDb.batch()
+
+  for (const product of SEED_PRODUCTS) {
+    const ref = adminDb
+      .collection("products")
+      .doc(product.id)
+
+    batch.set(ref, product)
+  }
+
+  await batch.commit()
+
+  snapshot = await adminDb.collection("products").get()
+}
+
+const products = snapshot.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+}))
 
     return NextResponse.json({ products })
   } catch (error) {
