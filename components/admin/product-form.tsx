@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Upload, X } from "lucide-react"
 import type { Product } from "@/lib/types"
 import { Field, TextInput, TextArea } from "@/components/ui/field"
-import { useToast } from "@/lib/toast"
 
 type Draft = Omit<Product, "id">
 
@@ -29,7 +28,10 @@ export function ProductForm({
   onSubmit: (draft: Draft) => void
   onCancel: () => void
 }) {
-  const toast = useToast()
+  const toast = (message: string, _type?: "success" | "error" | "info") => {
+    console.log(message)
+  }
+
   const fileRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState<Draft>(
     initial ? { ...initial } : emptyDraft,
@@ -44,15 +46,28 @@ export function ProductForm({
       toast("Image must be under 2MB", "error")
       return
     }
+
     const reader = new FileReader()
     reader.onload = () => set("image", reader.result as string)
     reader.readAsDataURL(file)
   }
 
   function submit() {
-    if (!draft.name.trim()) return toast("Product name is required", "error")
-    if (draft.price <= 0) return toast("Enter a valid price", "error")
-    if (!draft.image) return toast("Add a product image", "error")
+    if (!draft.name.trim()) {
+      toast("Product name is required", "error")
+      return
+    }
+
+    if (draft.price <= 0) {
+      toast("Enter a valid price", "error")
+      return
+    }
+
+    if (!draft.image) {
+      toast("Add a product image", "error")
+      return
+    }
+
     onSubmit({
       ...draft,
       name: draft.name.trim(),
@@ -67,6 +82,7 @@ export function ProductForm({
         <span className="mb-1.5 block text-sm font-medium text-foreground">
           Product Image
         </span>
+
         <div className="flex items-center gap-3">
           <div className="relative size-24 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary/40">
             {draft.image ? (
@@ -78,6 +94,7 @@ export function ProductForm({
                   sizes="96px"
                   className="object-cover"
                 />
+
                 <button
                   onClick={() => set("image", "")}
                   className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
@@ -92,6 +109,7 @@ export function ProductForm({
               </div>
             )}
           </div>
+
           <div className="flex-1 space-y-2">
             <button
               type="button"
@@ -100,6 +118,7 @@ export function ProductForm({
             >
               Upload from device
             </button>
+
             <input
               ref={fileRef}
               type="file"
@@ -110,6 +129,7 @@ export function ProductForm({
                 if (f) handleFile(f)
               }}
             />
+
             <TextInput
               value={draft.image.startsWith("data:") ? "" : draft.image}
               onChange={(e) => set("image", e.target.value)}
@@ -150,6 +170,7 @@ export function ProductForm({
             placeholder="0"
           />
         </Field>
+
         <Field label="Discount (%)" htmlFor="p-discount">
           <TextInput
             id="p-discount"
@@ -171,7 +192,9 @@ export function ProductForm({
           id="p-stock"
           inputMode="numeric"
           value={draft.stock || ""}
-          onChange={(e) => set("stock", Number(e.target.value.replace(/\D/g, "")))}
+          onChange={(e) =>
+            set("stock", Number(e.target.value.replace(/\D/g, "")))
+          }
           placeholder="0"
         />
       </Field>
@@ -193,6 +216,7 @@ export function ProductForm({
         >
           Cancel
         </button>
+
         <button
           onClick={submit}
           className="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
