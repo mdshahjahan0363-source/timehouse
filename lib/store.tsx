@@ -18,7 +18,7 @@ import type {
   OrderStatus,
 } from "./types"
 import { discountedPrice } from "./types"
-import { SEED_PRODUCTS } from "./seed"
+import { SEED_PRODUCTS } from "@/seed"
 
 const KEYS = {
   cart: "aurelia.cart",
@@ -368,4 +368,4 @@ export function useStore() {
   }
 
   return ctx
-      }
+}
