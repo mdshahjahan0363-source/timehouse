@@ -17,10 +17,12 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
+
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur">
         <div className="mx-auto max-w-7xl px-5 py-4">
           <div className="flex items-center justify-between">
+
             <Link
               href="/"
               className="text-xl tracking-[0.22em]"
@@ -29,6 +31,7 @@ export default function HomePage() {
             </Link>
 
             <div className="flex items-center gap-3">
+
               <Link
                 href="/cart"
                 className="relative rounded-full border border-white/15 p-3"
@@ -49,6 +52,7 @@ export default function HomePage() {
               >
                 Admin
               </Link>
+
             </div>
           </div>
 
@@ -59,39 +63,52 @@ export default function HomePage() {
       </header>
 
       {/* Search */}
-      <section className="border-b border-white/10 px-5 py-5">
+      <section className="border-b border-white/10 px-5 py-3">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[#151310] px-4 py-4">
-            <span className="text-2xl text-white/45">
+
+          <div className="flex h-14 items-center gap-3 rounded-2xl border border-white/15 bg-[#151310] px-4">
+
+            <span className="text-2xl leading-none text-white/45">
               ⌕
             </span>
 
             <span className="text-base text-white/45">
               Search watches
             </span>
+
           </div>
+
         </div>
       </section>
 
       {/* Hero */}
-      <section className="px-5 pt-7">
+      <section className="px-5 pt-5">
         <div className="mx-auto max-w-7xl">
+
           <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-[#171310]">
+
             {/* Decorative watch */}
-            <div className="pointer-events-none absolute -right-16 top-8 opacity-25">
-              <div className="flex h-64 w-44 items-center justify-center rounded-[70px] border-[20px] border-[#8d6725]">
-                <div className="flex h-28 w-28 items-center justify-center rounded-full border-[12px] border-[#8d6725]">
-                  <div className="h-12 w-2 rounded-full bg-[#8d6725]" />
+            <div className="pointer-events-none absolute -right-16 top-3 opacity-25">
+
+              <div className="flex h-52 w-36 items-center justify-center rounded-[60px] border-[17px] border-[#8d6725]">
+
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border-[10px] border-[#8d6725]">
+
+                  <div className="h-10 w-2 rounded-full bg-[#8d6725]" />
+
                 </div>
+
               </div>
+
             </div>
 
-            <div className="relative px-9 py-8 sm:px-12 sm:py-10">
-              <p className="text-[11px] uppercase tracking-[0.4em] text-[#d8a84e]">
+            <div className="relative px-9 py-5 sm:px-12 sm:py-7">
+
+              <p className="text-[10px] uppercase tracking-[0.4em] text-[#d8a84e]">
                 New Collection
               </p>
 
-              <h1 className="mt-4 max-w-[330px] font-serif text-[34px] leading-[1.15] text-white sm:text-5xl">
+              <h1 className="mt-3 max-w-[330px] font-serif text-[30px] leading-[1.12] text-white sm:text-5xl">
                 Timeless
                 <br />
                 craftsmanship
@@ -99,79 +116,87 @@ export default function HomePage() {
                 on your wrist
               </h1>
 
-              <p className="mt-5 max-w-[360px] text-sm leading-6 text-white/55">
+              <p className="mt-3 max-w-[360px] text-xs leading-5 text-white/55 sm:text-sm">
                 Hand-picked luxury watches, delivered with care.
               </p>
 
               <a
                 href="#collection"
-                className="mt-5 inline-flex rounded-full bg-[#f2b84b] px-6 py-3 text-sm font-medium text-black"
+                className="mt-4 inline-flex rounded-full bg-[#f2b84b] px-6 py-2.5 text-sm font-medium text-black"
               >
                 Explore Collection
               </a>
+
             </div>
+
           </div>
+
         </div>
       </section>
 
       {/* Features */}
-      <section className="px-5 pt-5">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-[#151310] px-4 py-5">
+      <section className="px-5 pt-4">
+
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
+
+          {/* Authentic */}
+          <div className="flex min-h-[92px] items-center gap-3 rounded-2xl border border-white/10 bg-[#151310] px-4 py-3">
+
             <ShieldCheck
-              size={24}
-              className="text-[#d8a84e]"
+              size={25}
+              className="shrink-0 text-[#d8a84e]"
             />
 
-            <p className="mt-3 text-sm font-medium">
-              Authentic
-            </p>
+            <div>
+              <p className="text-sm font-medium">
+                Authentic
+              </p>
 
-            <p className="mt-1 text-xs text-white/45">
-              100% genuine
-            </p>
+              <p className="mt-0.5 text-xs text-white/45">
+                100% genuine
+              </p>
+            </div>
+
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#151310] px-4 py-5">
+          {/* Fast Delivery */}
+          <div className="flex min-h-[92px] items-center gap-3 rounded-2xl border border-white/10 bg-[#151310] px-4 py-3">
+
             <Truck
-              size={24}
-              className="text-[#d8a84e]"
+              size={25}
+              className="shrink-0 text-[#d8a84e]"
             />
 
-            <p className="mt-3 text-sm font-medium">
-              Fast Delivery
-            </p>
+            <div>
+              <p className="text-sm font-medium">
+                Fast Delivery
+              </p>
 
-            <p className="mt-1 text-xs text-white/45">
-              Across India
-            </p>
+              <p className="mt-0.5 text-xs text-white/45">
+                Across India
+              </p>
+            </div>
+
           </div>
 
-          <div className="hidden rounded-2xl border border-white/10 bg-[#151310] px-4 py-5 sm:block">
-            <Sparkles
-              size={24}
-              className="text-[#d8a84e]"
-            />
-
-            <p className="mt-3 text-sm font-medium">
-              Premium Quality
-            </p>
-
-            <p className="mt-1 text-xs text-white/45">
-              Carefully selected
-            </p>
-          </div>
         </div>
+
       </section>
 
       {/* Products */}
       <section
         id="collection"
-        className="mx-auto max-w-7xl px-5 py-10"
+        className="mx-auto max-w-7xl px-5 py-8"
       >
-        <div className="mb-6 flex items-end justify-between">
+
+        <div className="mb-5 flex items-end justify-between">
+
           <div>
-            <h2 className="font-serif text-2xl">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d8a84e]">
+              Our Collection
+            </p>
+
+            <h2 className="mt-1 font-serif text-2xl">
               All Watches
             </h2>
           </div>
@@ -179,19 +204,27 @@ export default function HomePage() {
           <span className="text-sm text-white/45">
             {products.length} items
           </span>
+
         </div>
 
         {!ready ? (
+
           <div className="py-16 text-center text-white/50">
             Loading collection...
           </div>
+
         ) : products.length === 0 ? (
+
           <div className="rounded-2xl border border-white/10 py-16 text-center text-white/50">
             No products available.
           </div>
+
         ) : (
+
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+
             {products.map((product) => {
+
               const salePrice = discountedPrice(product)
 
               return (
@@ -200,7 +233,9 @@ export default function HomePage() {
                   href={`/product/${product.id}`}
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-[#151310]"
                 >
+
                   <div className="relative aspect-square overflow-hidden bg-[#171512]">
+
                     <Image
                       src={product.image}
                       alt={product.name}
@@ -222,9 +257,11 @@ export default function HomePage() {
                         </span>
                       </div>
                     )}
+
                   </div>
 
                   <div className="p-4">
+
                     <p className="text-[10px] uppercase tracking-[0.2em] text-[#d8a84e]">
                       {product.brand || "TIMEHUB"}
                     </p>
@@ -234,6 +271,7 @@ export default function HomePage() {
                     </h3>
 
                     <div className="mt-3 flex items-center gap-2">
+
                       <span className="font-medium">
                         ₹{salePrice.toLocaleString("en-IN")}
                       </span>
@@ -243,17 +281,23 @@ export default function HomePage() {
                           ₹{product.price.toLocaleString("en-IN")}
                         </span>
                       )}
+
                     </div>
+
                   </div>
+
                 </Link>
               )
             })}
+
           </div>
         )}
+
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 px-5 py-10 text-center">
+      <footer className="border-t border-white/10 px-5 py-8 text-center">
+
         <p className="text-lg tracking-[0.25em]">
           TIME<span className="text-[#d8a84e]">HUB</span>
         </p>
@@ -262,10 +306,12 @@ export default function HomePage() {
           Luxury Timepieces
         </p>
 
-        <p className="mt-5 text-[11px] text-white/30">
+        <p className="mt-4 text-[11px] text-white/30">
           © {new Date().getFullYear()} TimeHub. All rights reserved.
         </p>
+
       </footer>
+
     </main>
   )
 }
