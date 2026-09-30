@@ -18,12 +18,11 @@ export default function ProductPage({
   params,
 }: ProductPageProps) {
   const { id } = use(params)
+
   const { products, addToCart, ready } = useStore()
 
   const [added, setAdded] = useState(false)
   const [selectedImage, setSelectedImage] = useState("")
-
-  const product = products.find((item) => item.id === id)
 
   if (!ready) {
     return (
@@ -34,6 +33,8 @@ export default function ProductPage({
       </main>
     )
   }
+
+  const product = products.find((item) => item.id === id)
 
   if (!product) {
     return (
@@ -87,7 +88,6 @@ export default function ProductPage({
           <Link
             href="/"
             className="flex size-10 items-center justify-center rounded-full border border-border"
-            aria-label="Back"
           >
             <ArrowLeft className="size-5" />
           </Link>
@@ -96,6 +96,7 @@ export default function ProductPage({
             <p className="truncate text-xs text-muted-foreground">
               {product.brand || "AURELIA"}
             </p>
+
             <h1 className="truncate text-sm font-semibold">
               {product.name}
             </h1>
@@ -104,7 +105,6 @@ export default function ProductPage({
           <Link
             href="/cart"
             className="flex size-10 items-center justify-center rounded-full border border-border"
-            aria-label="Cart"
           >
             <ShoppingBag className="size-5" />
           </Link>
@@ -129,11 +129,14 @@ export default function ProductPage({
                 key={`${image}-${index}`}
                 type="button"
                 onClick={() => setSelectedImage(image)}
-                className={`size-16 shrink-0 overflow-hidden rounded-xl border ${
-                  currentImage === image
-                    ? "border-primary"
-                    : "border-border"
-                }`}
+                className={
+                  `size-16 shrink-0 overflow-hidden rounded-xl border ` +
+                  (
+                    currentImage === image
+                      ? "border-primary"
+                      : "border-border"
+                  )
+                }
               >
                 <img
                   src={image}
@@ -155,7 +158,7 @@ export default function ProductPage({
           {product.name}
         </h2>
 
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-2xl font-semibold">
             {formatINR(price)}
           </span>
@@ -166,4 +169,75 @@ export default function ProductPage({
                 {formatINR(product.price)}
               </span>
 
-              <span className="rounded
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                {product.discount}% OFF
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className="mt-4 rounded-xl border border-border bg-card p-3">
+          <p className="text-xs text-muted-foreground">
+            Availability
+          </p>
+
+          <p
+            className={
+              `mt-1 text-sm font-semibold ` +
+              (
+                product.stock > 0
+                  ? "text-emerald-600"
+                  : "text-red-600"
+              )
+            }
+          >
+            {product.stock > 0
+              ? `${product.stock} available`
+              : "Out of stock"}
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-base font-semibold">
+            Description
+          </h3>
+
+          <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+            {product.description ||
+              "A refined timepiece designed with attention to detail and timeless style."}
+          </p>
+        </div>
+      </section>
+
+      <section className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 p-4 backdrop-blur">
+        {added && (
+          <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-medium text-emerald-600">
+            Added to cart successfully
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={product.stock <= 0}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border py-3.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <ShoppingBag className="size-4" />
+            Add to Cart
+          </button>
+
+          <button
+            type="button"
+            onClick={handleBuyNow}
+            disabled={product.stock <= 0}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Zap className="size-4" />
+            Buy Now
+          </button>
+        </div>
+      </section>
+    </main>
+  )
+}
