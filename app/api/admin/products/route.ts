@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/firebase-admin"
 import {
   ADMIN_COOKIE,
   isValidSessionToken,
-} from "@/admin-auth"
+} from "@/lib/admin-auth"
 import { SEED_PRODUCTS } from "@/seed"
 async function requireAdmin() {
   const cookieStore = await cookies()
