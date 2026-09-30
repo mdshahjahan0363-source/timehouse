@@ -335,95 +335,118 @@ export default function AdminPage() {
               </button>
             </div>
 
-            {showForm && (
+            {/* ADD PRODUCT FORM */}
+            {showForm && !editingProduct && (
               <div className="mb-6 rounded-2xl border border-border bg-card p-5">
                 <h3 className="mb-4 text-lg font-semibold">
-                  {editingProduct
-                    ? "Edit Product"
-                    : "Add Product"}
+                  Add Product
                 </h3>
 
                 <ProductForm
-                  initial={editingProduct}
                   onSubmit={handleProductSubmit}
                   onCancel={closeForm}
                 />
               </div>
             )}
 
+            {/* PRODUCTS */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="flex gap-3 rounded-2xl border border-border bg-card p-3"
+                  className="min-w-0"
                 >
-                  <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-secondary/30">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                        No image
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] text-muted-foreground">
-                      {product.brand ||
-                        "AURELIA"}
-                    </div>
-
-                    <h3 className="mt-1 truncate text-sm font-semibold">
-                      {product.name}
-                    </h3>
-
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-sm font-semibold">
-                        {formatINR(
-                          discountedPrice(product)
-                        )}
-                      </span>
-
-                      {product.discount > 0 && (
-                        <span className="text-[10px] text-muted-foreground line-through">
-                          {formatINR(
-                            product.price
-                          )}
-                        </span>
+                  {/* PRODUCT CARD */}
+                  <div className="flex gap-3 rounded-2xl border border-border bg-card p-3">
+                    <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-secondary/30">
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                          No image
+                        </div>
                       )}
                     </div>
 
-                    <div className="mt-1 text-[11px] text-muted-foreground">
-                      Stock: {product.stock}
-                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] text-muted-foreground">
+                        {product.brand ||
+                          "AURELIA"}
+                      </div>
 
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openEdit(product)
-                        }
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-medium"
-                      >
-                        <Pencil className="size-3.5" />
-                        Edit
-                      </button>
+                      <h3 className="mt-1 truncate text-sm font-semibold">
+                        {product.name}
+                      </h3>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDelete(product)
-                        }
-                        className="flex items-center justify-center rounded-lg border border-red-500/30 px-3 py-2 text-red-600"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-sm font-semibold">
+                          {formatINR(
+                            discountedPrice(product)
+                          )}
+                        </span>
+
+                        {product.discount > 0 && (
+                          <span className="text-[10px] text-muted-foreground line-through">
+                            {formatINR(
+                              product.price
+                            )}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        Stock: {product.stock}
+                      </div>
+
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openEdit(product)
+                          }
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-medium"
+                        >
+                          <Pencil className="size-3.5" />
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(product)
+                          }
+                          className="flex items-center justify-center rounded-lg border border-red-500/30 px-3 py-2 text-red-600"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
+
+                  {/* EDIT FORM - SAME PRODUCT KE NICHE */}
+                  {showForm &&
+                    editingProduct?.id ===
+                      product.id && (
+                      <div className="mt-3 rounded-2xl border border-primary/30 bg-card p-4">
+                        <h3 className="mb-4 text-lg font-semibold">
+                          Edit Product
+                        </h3>
+
+                        <ProductForm
+                          initial={
+                            editingProduct
+                          }
+                          onSubmit={
+                            handleProductSubmit
+                          }
+                          onCancel={closeForm}
+                        />
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
