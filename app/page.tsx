@@ -23,7 +23,7 @@ export default function HomePage() {
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-5 py-4">
 
-          {/* BRAND + ADMIN */}
+          {/* TIMEHUB + ADMIN */}
           <div className="flex items-center justify-between">
 
             <Link href="/" className="block">
@@ -31,7 +31,7 @@ export default function HomePage() {
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
 
-              <div className="mt-0.5 text-[9px] tracking-[0.28em] text-white/45">
+              <div className="mt-1 text-[10px] font-semibold tracking-[0.25em] text-white/70">
                 Luxury Timepieces
               </div>
             </Link>
@@ -49,7 +49,7 @@ export default function HomePage() {
           <div className="mt-3">
             <div className="flex h-[52px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
 
-              <Search className="mr-3 size-5 text-white/45" />
+              <Search className="mr-3 size-5 text-white/50" />
 
               <input
                 type="text"
@@ -66,32 +66,41 @@ export default function HomePage() {
       {/* SPACE FOR FIXED HEADER */}
       <div className="h-[158px]" />
 
-      {/* HERO / NEW COLLECTION */}
+      {/* HERO */}
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
 
           <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
-            {/* WATCH DECORATION */}
-            <div className="pointer-events-none absolute -right-7 top-0 opacity-20">
-              <div className="relative h-36 w-24">
+            {/* VISIBLE WATCH */}
+            <div className="pointer-events-none absolute -right-7 -top-2 opacity-45">
 
-                <div className="absolute left-9 top-0 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
+              <div className="relative h-40 w-28">
 
-                <div className="absolute left-0 top-7 h-22 w-22 rounded-full border-[5px] border-[#9b6b18]">
-                  <div className="absolute left-1/2 top-1/2 h-6 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+                {/* TOP STRAP */}
+                <div className="absolute left-10 top-0 h-10 w-10 rounded-[12px] border-[6px] border-[#b47a18]" />
+
+                {/* WATCH BODY */}
+                <div className="absolute left-0 top-8 h-24 w-24 rounded-full border-[6px] border-[#b47a18]">
+
+                  <div className="absolute left-1/2 top-1/2 h-7 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b47a18]" />
+
+                  <div className="absolute left-1/2 top-[38%] h-1 w-7 -translate-x-1/2 rotate-[-20deg] rounded-full bg-[#b47a18]" />
+
                 </div>
 
-                <div className="absolute bottom-0 left-9 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
+                {/* BOTTOM STRAP */}
+                <div className="absolute bottom-0 left-10 h-10 w-10 rounded-[12px] border-[6px] border-[#b47a18]" />
 
               </div>
+
             </div>
 
             {/* HERO CONTENT */}
             <div className="relative z-10 max-w-[70%]">
 
-              <p className="text-[6px] uppercase tracking-[0.32em] text-[#d8a84e]">
+              <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
                 New Collection
               </p>
 
@@ -99,7 +108,7 @@ export default function HomePage() {
                 Timeless craftsmanship on your wrist
               </h1>
 
-              <p className="mt-2 max-w-[230px] text-[7px] leading-3 text-white/50">
+              <p className="mt-2 max-w-[230px] text-[7px] leading-3 text-white/55">
                 Hand-picked luxury watches, delivered with care.
               </p>
 
@@ -132,7 +141,7 @@ export default function HomePage() {
                 Authentic
               </div>
 
-              <div className="mt-0.5 text-[10px] text-white/45">
+              <div className="mt-0.5 text-[10px] text-white/50">
                 100% genuine
               </div>
             </div>
@@ -148,7 +157,7 @@ export default function HomePage() {
                 Fast Delivery
               </div>
 
-              <div className="mt-0.5 text-[10px] text-white/45">
+              <div className="mt-0.5 text-[10px] text-white/50">
                 Across India
               </div>
             </div>
@@ -212,6 +221,7 @@ export default function HomePage() {
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] transition hover:border-[#d8a84e]/40"
                 >
 
+                  {/* PRODUCT IMAGE */}
                   <div className="relative aspect-square overflow-hidden bg-[#171512]">
 
                     <Image
@@ -238,6 +248,7 @@ export default function HomePage() {
 
                   </div>
 
+                  {/* PRODUCT INFO */}
                   <div className="p-4">
 
                     <p className="text-[10px] uppercase tracking-[0.2em] text-[#d8a84e]">
@@ -281,7 +292,7 @@ export default function HomePage() {
           TIME<span className="text-[#d8a84e]">HUB</span>
         </p>
 
-        <p className="mt-2 text-xs text-white/40">
+        <p className="mt-2 text-xs text-white/50">
           Luxury Timepieces
         </p>
 
@@ -296,16 +307,19 @@ export default function HomePage() {
 
         <div className="mx-auto grid max-w-md grid-cols-4">
 
+          {/* HOME */}
           <Link
             href="/"
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
             <Sparkles className="size-6" />
+
             <span className="text-xs">
               Home
             </span>
           </Link>
 
+          {/* CART */}
           <Link
             href="/cart"
             className="relative flex flex-col items-center gap-1 py-3 text-white/50"
@@ -325,6 +339,7 @@ export default function HomePage() {
 
           </Link>
 
+          {/* HISTORY */}
           <Link
             href="/history"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
@@ -340,6 +355,7 @@ export default function HomePage() {
 
           </Link>
 
+          {/* MY */}
           <Link
             href="/my"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
