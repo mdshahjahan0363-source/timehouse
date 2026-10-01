@@ -16,17 +16,25 @@ import { discountedPrice } from "@/lib/types"
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
 
+  function openAdmin() {
+    window.location.assign("/admin")
+  }
+
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* FIXED HEADER */}
-      <header className="fixed left-0 right-0 top-0 z-[9999] border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl">
+      {/* ================= FIXED HEADER ================= */}
+      <header className="pointer-events-none fixed left-0 right-0 top-0 z-[99999] border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl">
 
         <div className="mx-auto max-w-7xl px-5 py-2.5">
 
           <div className="flex items-center justify-between">
 
-            <a href="/" className="block">
+            {/* LOGO */}
+            <a
+              href="/"
+              className="pointer-events-auto block"
+            >
               <div className="text-[22px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
@@ -36,18 +44,19 @@ export default function HomePage() {
               </div>
             </a>
 
-            {/* ADMIN - DIRECT LINK */}
-            <a
-              href="/admin"
-              className="relative z-[10000] flex h-[40px] cursor-pointer items-center rounded-full border border-white/15 px-5 text-sm text-white/80"
+            {/* ADMIN */}
+            <button
+              type="button"
+              onClick={openAdmin}
+              className="pointer-events-auto relative z-[100000] flex h-[38px] min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white/85 active:scale-95"
             >
               Admin
-            </a>
+            </button>
 
           </div>
 
           {/* SEARCH */}
-          <div className="mt-2.5">
+          <div className="pointer-events-auto mt-2.5">
 
             <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
 
@@ -64,13 +73,12 @@ export default function HomePage() {
           </div>
 
         </div>
-
       </header>
 
       {/* SPACE FOR FIXED HEADER */}
       <div className="h-[122px]" />
 
-      {/* HERO */}
+      {/* ================= HERO ================= */}
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
@@ -134,41 +142,45 @@ export default function HomePage() {
 
       </section>
 
-      {/* FEATURES - SMALL HEIGHT */}
+      {/* ================= SMALL FEATURES ================= */}
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
           {/* AUTHENTIC */}
-          <div className="flex h-[48px] items-center gap-2 rounded-[14px] border border-white/10 bg-[#151310] px-3">
+          <div className="flex h-[42px] min-h-[42px] max-h-[42px] items-center gap-2 rounded-[12px] border border-white/10 bg-[#151310] px-3">
 
-            <ShieldCheck className="size-5 shrink-0 text-[#d8a84e]" />
+            <ShieldCheck className="size-[18px] shrink-0 text-[#d8a84e]" />
 
-            <div>
-              <div className="text-[12px] font-medium">
+            <div className="min-w-0 leading-none">
+
+              <div className="text-[11px] font-medium">
                 Authentic
               </div>
 
-              <div className="text-[8px] text-white/50">
+              <div className="mt-1 text-[7px] text-white/50">
                 100% genuine
               </div>
+
             </div>
 
           </div>
 
           {/* FAST DELIVERY */}
-          <div className="flex h-[48px] items-center gap-2 rounded-[14px] border border-white/10 bg-[#151310] px-3">
+          <div className="flex h-[42px] min-h-[42px] max-h-[42px] items-center gap-2 rounded-[12px] border border-white/10 bg-[#151310] px-3">
 
-            <Truck className="size-5 shrink-0 text-[#d8a84e]" />
+            <Truck className="size-[18px] shrink-0 text-[#d8a84e]" />
 
-            <div>
-              <div className="text-[12px] font-medium">
+            <div className="min-w-0 leading-none">
+
+              <div className="text-[11px] font-medium">
                 Fast Delivery
               </div>
 
-              <div className="text-[8px] text-white/50">
+              <div className="mt-1 text-[7px] text-white/50">
                 Across India
               </div>
+
             </div>
 
           </div>
@@ -177,7 +189,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* COLLECTION */}
+      {/* ================= COLLECTION ================= */}
       <section
         id="collection"
         className="mx-auto max-w-7xl px-5 py-7"
@@ -248,9 +260,11 @@ export default function HomePage() {
 
                     {product.stock <= 0 && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+
                         <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
                           Out of stock
                         </span>
+
                       </div>
                     )}
 
@@ -292,7 +306,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* FOOTER */}
+      {/* ================= FOOTER ================= */}
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
@@ -309,7 +323,7 @@ export default function HomePage() {
 
       </footer>
 
-      {/* BOTTOM NAV */}
+      {/* ================= BOTTOM NAV ================= */}
       <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
 
         <div className="mx-auto grid max-w-md grid-cols-4">
@@ -319,7 +333,9 @@ export default function HomePage() {
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
             <Sparkles className="size-6" />
-            <span className="text-xs">Home</span>
+            <span className="text-xs">
+              Home
+            </span>
           </Link>
 
           <Link
@@ -335,7 +351,9 @@ export default function HomePage() {
               </span>
             )}
 
-            <span className="text-xs">Cart</span>
+            <span className="text-xs">
+              Cart
+            </span>
 
           </Link>
 
@@ -343,18 +361,28 @@ export default function HomePage() {
             href="/history"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
+
             <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
               <div className="h-2 w-0.5 bg-current" />
             </div>
-            <span className="text-xs">History</span>
+
+            <span className="text-xs">
+              History
+            </span>
+
           </Link>
 
           <Link
             href="/my"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
+
             <div className="size-6 rounded-full border-2 border-current" />
-            <span className="text-xs">My</span>
+
+            <span className="text-xs">
+              My
+            </span>
+
           </Link>
 
         </div>
