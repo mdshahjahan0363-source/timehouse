@@ -268,4 +268,52 @@ export default function HomePage() {
 
       {/* MOBILE BOTTOM NAV */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
-        <div className="mx-auto
+        <div className="mx-auto grid max-w-md grid-cols-4">
+
+          <Link
+            href="/"
+            className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
+          >
+            <Sparkles className="size-6" />
+            <span className="text-xs">Home</span>
+          </Link>
+
+          <Link
+            href="/cart"
+            className="relative flex flex-col items-center gap-1 py-3 text-white/50"
+          >
+            <ShoppingBag className="size-6" />
+
+            {cartCount > 0 && (
+              <span className="absolute right-[28%] top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] text-black">
+                {cartCount}
+              </span>
+            )}
+
+            <span className="text-xs">Cart</span>
+          </Link>
+
+          <Link
+            href="/history"
+            className="flex flex-col items-center gap-1 py-3 text-white/50"
+          >
+            <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
+              <div className="h-2 w-0.5 bg-current" />
+            </div>
+            <span className="text-xs">History</span>
+          </Link>
+
+          <Link
+            href="/my"
+            className="flex flex-col items-center gap-1 py-3 text-white/50"
+          >
+            <div className="size-6 rounded-full border-2 border-current" />
+            <span className="text-xs">My</span>
+          </Link>
+
+        </div>
+      </div>
+
+    </main>
+  )
+}
