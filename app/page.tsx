@@ -16,24 +16,30 @@ import { discountedPrice } from "@/lib/types"
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
 
-  function openAdmin() {
-    window.location.assign("/admin")
-  }
-
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
       {/* ================= FIXED HEADER ================= */}
-      <header className="pointer-events-none fixed left-0 right-0 top-0 z-[99999] border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl">
-
+      <header
+        className="fixed left-0 right-0 top-0 border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl"
+        style={{
+          zIndex: 999999,
+          pointerEvents: "auto",
+        }}
+      >
         <div className="mx-auto max-w-7xl px-5 py-2.5">
 
           <div className="flex items-center justify-between">
 
-            {/* LOGO */}
+            {/* TIMEHUB */}
             <a
               href="/"
-              className="pointer-events-auto block"
+              className="block"
+              style={{
+                position: "relative",
+                zIndex: 1000000,
+                pointerEvents: "auto",
+              }}
             >
               <div className="text-[22px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
@@ -45,18 +51,25 @@ export default function HomePage() {
             </a>
 
             {/* ADMIN */}
-            <button
-              type="button"
-              onClick={openAdmin}
-              className="pointer-events-auto relative z-[100000] flex h-[38px] min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white/85 active:scale-95"
+            <a
+              href="/admin"
+              aria-label="Open Admin"
+              className="flex h-[40px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white/85"
+              style={{
+                position: "relative",
+                zIndex: 1000000,
+                pointerEvents: "auto",
+                touchAction: "manipulation",
+                WebkitTapHighlightColor: "transparent",
+              }}
             >
               Admin
-            </button>
+            </a>
 
           </div>
 
           {/* SEARCH */}
-          <div className="pointer-events-auto mt-2.5">
+          <div className="mt-2.5">
 
             <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
 
@@ -75,7 +88,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* SPACE FOR FIXED HEADER */}
+      {/* HEADER SPACE */}
       <div className="h-[122px]" />
 
       {/* ================= HERO ================= */}
@@ -142,23 +155,30 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= SMALL FEATURES ================= */}
+      {/* ================= FEATURES ================= */}
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
           {/* AUTHENTIC */}
-          <div className="flex h-[42px] min-h-[42px] max-h-[42px] items-center gap-2 rounded-[12px] border border-white/10 bg-[#151310] px-3">
+          <div
+            className="flex items-center gap-2 overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            style={{
+              height: "42px",
+              minHeight: "42px",
+              maxHeight: "42px",
+            }}
+          >
 
-            <ShieldCheck className="size-[18px] shrink-0 text-[#d8a84e]" />
+            <ShieldCheck className="size-[17px] shrink-0 text-[#d8a84e]" />
 
-            <div className="min-w-0 leading-none">
+            <div className="min-w-0">
 
-              <div className="text-[11px] font-medium">
+              <div className="whitespace-nowrap text-[11px] font-medium leading-none">
                 Authentic
               </div>
 
-              <div className="mt-1 text-[7px] text-white/50">
+              <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
                 100% genuine
               </div>
 
@@ -167,17 +187,24 @@ export default function HomePage() {
           </div>
 
           {/* FAST DELIVERY */}
-          <div className="flex h-[42px] min-h-[42px] max-h-[42px] items-center gap-2 rounded-[12px] border border-white/10 bg-[#151310] px-3">
+          <div
+            className="flex items-center gap-2 overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            style={{
+              height: "42px",
+              minHeight: "42px",
+              maxHeight: "42px",
+            }}
+          >
 
-            <Truck className="size-[18px] shrink-0 text-[#d8a84e]" />
+            <Truck className="size-[17px] shrink-0 text-[#d8a84e]" />
 
-            <div className="min-w-0 leading-none">
+            <div className="min-w-0">
 
-              <div className="text-[11px] font-medium">
+              <div className="whitespace-nowrap text-[11px] font-medium leading-none">
                 Fast Delivery
               </div>
 
-              <div className="mt-1 text-[7px] text-white/50">
+              <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
                 Across India
               </div>
 
@@ -324,7 +351,10 @@ export default function HomePage() {
       </footer>
 
       {/* ================= BOTTOM NAV ================= */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
+      <div
+        className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur"
+        style={{ zIndex: 99998 }}
+      >
 
         <div className="mx-auto grid max-w-md grid-cols-4">
 
