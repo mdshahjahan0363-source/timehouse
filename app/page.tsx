@@ -22,18 +22,18 @@ export default function HomePage() {
       {/* ================= FIXED HEADER ================= */}
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
 
-        <div className="mx-auto max-w-7xl px-5 py-2.5">
+        <div className="mx-auto max-w-7xl px-5 py-3.5">
 
           {/* BRAND + ADMIN */}
           <div className="flex items-center justify-between">
 
             <Link href="/" className="block">
 
-              <div className="text-[22px] font-medium tracking-[0.18em]">
+              <div className="text-[25px] font-medium tracking-[0.20em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
 
-              <div className="mt-0.5 text-[9px] font-semibold tracking-[0.25em] text-white/75">
+              <div className="mt-1 text-[10px] font-semibold tracking-[0.25em] text-white/70">
                 Luxury Timepieces
               </div>
 
@@ -41,7 +41,7 @@ export default function HomePage() {
 
             <Link
               href="/admin"
-              className="relative z-[200] pointer-events-auto rounded-full border border-white/15 px-5 py-2 text-sm text-white/80"
+              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
             >
               Admin
             </Link>
@@ -49,9 +49,9 @@ export default function HomePage() {
           </div>
 
           {/* SEARCH */}
-          <div className="mt-2.5">
+          <div className="mt-3">
 
-            <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
+            <div className="flex h-[50px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
 
               <Search className="mr-3 size-5 text-white/50" />
 
@@ -66,10 +66,11 @@ export default function HomePage() {
           </div>
 
         </div>
+
       </header>
 
       {/* SPACE FOR FIXED HEADER */}
-      <div className="h-[125px]" />
+      <div className="h-[148px]" />
 
       {/* ================= HERO ================= */}
       <section className="border-b border-white/10 px-5 py-3">
@@ -89,10 +90,13 @@ export default function HomePage() {
                 {/* WATCH CASE */}
                 <div className="absolute left-[4px] top-[35px] h-[105px] w-[105px] rounded-full border-[7px] border-[#b47a18]">
 
+                  {/* INNER DIAL */}
                   <div className="absolute inset-[9px] rounded-full border-[2px] border-[#b47a18]/60">
 
+                    {/* HAND 1 */}
                     <div className="absolute left-1/2 top-1/2 h-[32px] w-[4px] -translate-x-1/2 -translate-y-[85%] rotate-[25deg] rounded-full bg-[#b47a18]" />
 
+                    {/* HAND 2 */}
                     <div className="absolute left-1/2 top-1/2 h-[25px] w-[3px] -translate-x-1/2 -translate-y-[20%] rotate-[105deg] rounded-full bg-[#b47a18]" />
 
                   </div>
