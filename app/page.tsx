@@ -19,39 +19,37 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* ================= FIXED HEADER ================= */}
-      <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
+      {/* FIXED HEADER */}
+      <header className="fixed left-0 right-0 top-0 z-[9999] border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl">
 
-        <div className="mx-auto max-w-7xl px-5 py-3.5">
+        <div className="mx-auto max-w-7xl px-5 py-2.5">
 
-          {/* BRAND + ADMIN */}
           <div className="flex items-center justify-between">
 
-            <Link href="/" className="block">
-
-              <div className="text-[25px] font-medium tracking-[0.20em]">
+            <a href="/" className="block">
+              <div className="text-[22px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
 
-              <div className="mt-1 text-[10px] font-semibold tracking-[0.25em] text-white/70">
+              <div className="mt-0.5 text-[9px] font-semibold tracking-[0.25em] text-white/75">
                 Luxury Timepieces
               </div>
+            </a>
 
-            </Link>
-
-            <Link
+            {/* ADMIN - DIRECT LINK */}
+            <a
               href="/admin"
-              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
+              className="relative z-[10000] flex h-[40px] cursor-pointer items-center rounded-full border border-white/15 px-5 text-sm text-white/80"
             >
               Admin
-            </Link>
+            </a>
 
           </div>
 
           {/* SEARCH */}
-          <div className="mt-3">
+          <div className="mt-2.5">
 
-            <div className="flex h-[50px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
+            <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
 
               <Search className="mr-3 size-5 text-white/50" />
 
@@ -70,9 +68,9 @@ export default function HomePage() {
       </header>
 
       {/* SPACE FOR FIXED HEADER */}
-      <div className="h-[148px]" />
+      <div className="h-[122px]" />
 
-      {/* ================= HERO ================= */}
+      {/* HERO */}
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
@@ -84,36 +82,29 @@ export default function HomePage() {
 
               <div className="relative h-[176px] w-[125px]">
 
-                {/* TOP STRAP */}
                 <div className="absolute left-[43px] top-0 h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
-                {/* WATCH CASE */}
                 <div className="absolute left-[4px] top-[35px] h-[105px] w-[105px] rounded-full border-[7px] border-[#b47a18]">
 
-                  {/* INNER DIAL */}
                   <div className="absolute inset-[9px] rounded-full border-[2px] border-[#b47a18]/60">
 
-                    {/* HAND 1 */}
                     <div className="absolute left-1/2 top-1/2 h-[32px] w-[4px] -translate-x-1/2 -translate-y-[85%] rotate-[25deg] rounded-full bg-[#b47a18]" />
 
-                    {/* HAND 2 */}
                     <div className="absolute left-1/2 top-1/2 h-[25px] w-[3px] -translate-x-1/2 -translate-y-[20%] rotate-[105deg] rounded-full bg-[#b47a18]" />
 
                   </div>
 
                 </div>
 
-                {/* CROWN */}
                 <div className="absolute right-[-3px] top-[82px] h-[18px] w-[9px] rounded-r-md bg-[#b47a18]" />
 
-                {/* BOTTOM STRAP */}
                 <div className="absolute bottom-0 left-[43px] h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
               </div>
 
             </div>
 
-            {/* HERO TEXT */}
+            {/* HERO CONTENT */}
             <div className="relative z-10 max-w-[67%]">
 
               <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
@@ -143,45 +134,41 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= FEATURES ================= */}
+      {/* FEATURES - SMALL HEIGHT */}
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
           {/* AUTHENTIC */}
-          <div className="flex h-[58px] items-center gap-2.5 rounded-[16px] border border-white/10 bg-[#151310] px-3">
+          <div className="flex h-[48px] items-center gap-2 rounded-[14px] border border-white/10 bg-[#151310] px-3">
 
             <ShieldCheck className="size-5 shrink-0 text-[#d8a84e]" />
 
             <div>
-
-              <div className="text-[13px] font-medium">
+              <div className="text-[12px] font-medium">
                 Authentic
               </div>
 
-              <div className="mt-0.5 text-[9px] text-white/50">
+              <div className="text-[8px] text-white/50">
                 100% genuine
               </div>
-
             </div>
 
           </div>
 
           {/* FAST DELIVERY */}
-          <div className="flex h-[58px] items-center gap-2.5 rounded-[16px] border border-white/10 bg-[#151310] px-3">
+          <div className="flex h-[48px] items-center gap-2 rounded-[14px] border border-white/10 bg-[#151310] px-3">
 
             <Truck className="size-5 shrink-0 text-[#d8a84e]" />
 
             <div>
-
-              <div className="text-[13px] font-medium">
+              <div className="text-[12px] font-medium">
                 Fast Delivery
               </div>
 
-              <div className="mt-0.5 text-[9px] text-white/50">
+              <div className="text-[8px] text-white/50">
                 Across India
               </div>
-
             </div>
 
           </div>
@@ -190,7 +177,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= COLLECTION ================= */}
+      {/* COLLECTION */}
       <section
         id="collection"
         className="mx-auto max-w-7xl px-5 py-7"
@@ -243,7 +230,6 @@ export default function HomePage() {
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] transition hover:border-[#d8a84e]/40"
                 >
 
-                  {/* PRODUCT IMAGE */}
                   <div className="relative aspect-square overflow-hidden bg-[#171512]">
 
                     <Image
@@ -262,17 +248,14 @@ export default function HomePage() {
 
                     {product.stock <= 0 && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-
                         <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
                           Out of stock
                         </span>
-
                       </div>
                     )}
 
                   </div>
 
-                  {/* PRODUCT DETAILS */}
                   <div className="p-4">
 
                     <p className="text-[10px] uppercase tracking-[0.2em] text-[#d8a84e]">
@@ -309,7 +292,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
@@ -326,26 +309,19 @@ export default function HomePage() {
 
       </footer>
 
-      {/* ================= BOTTOM NAV ================= */}
+      {/* BOTTOM NAV */}
       <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
 
         <div className="mx-auto grid max-w-md grid-cols-4">
 
-          {/* HOME */}
           <Link
             href="/"
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
-
             <Sparkles className="size-6" />
-
-            <span className="text-xs">
-              Home
-            </span>
-
+            <span className="text-xs">Home</span>
           </Link>
 
-          {/* CART */}
           <Link
             href="/cart"
             className="relative flex flex-col items-center gap-1 py-3 text-white/50"
@@ -359,42 +335,26 @@ export default function HomePage() {
               </span>
             )}
 
-            <span className="text-xs">
-              Cart
-            </span>
+            <span className="text-xs">Cart</span>
 
           </Link>
 
-          {/* HISTORY */}
           <Link
             href="/history"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
-
             <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
-
               <div className="h-2 w-0.5 bg-current" />
-
             </div>
-
-            <span className="text-xs">
-              History
-            </span>
-
+            <span className="text-xs">History</span>
           </Link>
 
-          {/* MY */}
           <Link
             href="/my"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
-
             <div className="size-6 rounded-full border-2 border-current" />
-
-            <span className="text-xs">
-              My
-            </span>
-
+            <span className="text-xs">My</span>
           </Link>
 
         </div>
