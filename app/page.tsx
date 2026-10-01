@@ -19,14 +19,16 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* FIXED HEADER */}
+      {/* ================= FIXED HEADER ================= */}
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-5 py-4">
 
-          {/* TIMEHUB + ADMIN */}
+        <div className="mx-auto max-w-7xl px-5 py-3.5">
+
+          {/* BRAND + ADMIN */}
           <div className="flex items-center justify-between">
 
             <Link href="/" className="block">
+
               <div className="text-[25px] font-medium tracking-[0.20em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
@@ -34,6 +36,7 @@ export default function HomePage() {
               <div className="mt-1 text-[10px] font-semibold tracking-[0.25em] text-white/70">
                 Luxury Timepieces
               </div>
+
             </Link>
 
             <Link
@@ -45,9 +48,10 @@ export default function HomePage() {
 
           </div>
 
-          {/* FIXED SEARCH */}
+          {/* SEARCH */}
           <div className="mt-3">
-            <div className="flex h-[52px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
+
+            <div className="flex h-[50px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
 
               <Search className="mr-3 size-5 text-white/50" />
 
@@ -58,47 +62,59 @@ export default function HomePage() {
               />
 
             </div>
+
           </div>
 
         </div>
+
       </header>
 
       {/* SPACE FOR FIXED HEADER */}
-      <div className="h-[158px]" />
+      <div className="h-[148px]" />
 
-      {/* HERO */}
+      {/* ================= HERO ================= */}
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
 
           <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
-            {/* VISIBLE WATCH */}
-            <div className="pointer-events-none absolute -right-7 -top-2 opacity-45">
+            {/* WATCH */}
+            <div className="pointer-events-none absolute right-[-2px] top-[-8px] opacity-45">
 
-              <div className="relative h-40 w-28">
+              <div className="relative h-[176px] w-[125px]">
 
                 {/* TOP STRAP */}
-                <div className="absolute left-10 top-0 h-10 w-10 rounded-[12px] border-[6px] border-[#b47a18]" />
+                <div className="absolute left-[43px] top-0 h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
-                {/* WATCH BODY */}
-                <div className="absolute left-0 top-8 h-24 w-24 rounded-full border-[6px] border-[#b47a18]">
+                {/* WATCH CASE */}
+                <div className="absolute left-[4px] top-[35px] h-[105px] w-[105px] rounded-full border-[7px] border-[#b47a18]">
 
-                  <div className="absolute left-1/2 top-1/2 h-7 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b47a18]" />
+                  {/* INNER DIAL */}
+                  <div className="absolute inset-[9px] rounded-full border-[2px] border-[#b47a18]/60">
 
-                  <div className="absolute left-1/2 top-[38%] h-1 w-7 -translate-x-1/2 rotate-[-20deg] rounded-full bg-[#b47a18]" />
+                    {/* HAND 1 */}
+                    <div className="absolute left-1/2 top-1/2 h-[32px] w-[4px] -translate-x-1/2 -translate-y-[85%] rotate-[25deg] rounded-full bg-[#b47a18]" />
+
+                    {/* HAND 2 */}
+                    <div className="absolute left-1/2 top-1/2 h-[25px] w-[3px] -translate-x-1/2 -translate-y-[20%] rotate-[105deg] rounded-full bg-[#b47a18]" />
+
+                  </div>
 
                 </div>
 
+                {/* CROWN */}
+                <div className="absolute right-[-3px] top-[82px] h-[18px] w-[9px] rounded-r-md bg-[#b47a18]" />
+
                 {/* BOTTOM STRAP */}
-                <div className="absolute bottom-0 left-10 h-10 w-10 rounded-[12px] border-[6px] border-[#b47a18]" />
+                <div className="absolute bottom-0 left-[43px] h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
               </div>
 
             </div>
 
-            {/* HERO CONTENT */}
-            <div className="relative z-10 max-w-[70%]">
+            {/* HERO TEXT */}
+            <div className="relative z-10 max-w-[67%]">
 
               <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
                 New Collection
@@ -127,39 +143,45 @@ export default function HomePage() {
 
       </section>
 
-      {/* FEATURES */}
-      <section className="px-5 py-3">
+      {/* ================= FEATURES ================= */}
+      <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
-          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
+          {/* AUTHENTIC */}
+          <div className="flex h-[58px] items-center gap-2.5 rounded-[16px] border border-white/10 bg-[#151310] px-3">
 
-            <ShieldCheck className="size-6 shrink-0 text-[#d8a84e]" />
+            <ShieldCheck className="size-5 shrink-0 text-[#d8a84e]" />
 
             <div>
-              <div className="text-sm font-medium">
+
+              <div className="text-[13px] font-medium">
                 Authentic
               </div>
 
-              <div className="mt-0.5 text-[10px] text-white/50">
+              <div className="mt-0.5 text-[9px] text-white/50">
                 100% genuine
               </div>
+
             </div>
 
           </div>
 
-          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
+          {/* FAST DELIVERY */}
+          <div className="flex h-[58px] items-center gap-2.5 rounded-[16px] border border-white/10 bg-[#151310] px-3">
 
-            <Truck className="size-6 shrink-0 text-[#d8a84e]" />
+            <Truck className="size-5 shrink-0 text-[#d8a84e]" />
 
             <div>
-              <div className="text-sm font-medium">
+
+              <div className="text-[13px] font-medium">
                 Fast Delivery
               </div>
 
-              <div className="mt-0.5 text-[10px] text-white/50">
+              <div className="mt-0.5 text-[9px] text-white/50">
                 Across India
               </div>
+
             </div>
 
           </div>
@@ -168,7 +190,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* COLLECTION */}
+      {/* ================= COLLECTION ================= */}
       <section
         id="collection"
         className="mx-auto max-w-7xl px-5 py-7"
@@ -240,15 +262,17 @@ export default function HomePage() {
 
                     {product.stock <= 0 && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+
                         <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
                           Out of stock
                         </span>
+
                       </div>
                     )}
 
                   </div>
 
-                  {/* PRODUCT INFO */}
+                  {/* PRODUCT DETAILS */}
                   <div className="p-4">
 
                     <p className="text-[10px] uppercase tracking-[0.2em] text-[#d8a84e]">
@@ -285,7 +309,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* FOOTER */}
+      {/* ================= FOOTER ================= */}
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
@@ -302,7 +326,7 @@ export default function HomePage() {
 
       </footer>
 
-      {/* MOBILE BOTTOM NAV */}
+      {/* ================= BOTTOM NAV ================= */}
       <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
 
         <div className="mx-auto grid max-w-md grid-cols-4">
@@ -312,11 +336,13 @@ export default function HomePage() {
             href="/"
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
+
             <Sparkles className="size-6" />
 
             <span className="text-xs">
               Home
             </span>
+
           </Link>
 
           {/* CART */}
@@ -346,7 +372,9 @@ export default function HomePage() {
           >
 
             <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
+
               <div className="h-2 w-0.5 bg-current" />
+
             </div>
 
             <span className="text-xs">
