@@ -19,146 +19,164 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* HEADER */}
-      <header className="border-b border-white/10 bg-[#0b0a08]">
-        <div className="mx-auto max-w-7xl px-5 py-5">
+      {/* FIXED HEADER */}
+      <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-5 py-4">
 
+          {/* BRAND + ADMIN */}
           <div className="flex items-center justify-between">
+
             <Link href="/" className="block">
-              <div className="text-[27px] font-medium tracking-[0.22em]">
+              <div className="text-[25px] font-medium tracking-[0.20em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
 
-              <div className="mt-1 text-[11px] tracking-[0.28em] text-white/45">
+              <div className="mt-0.5 text-[9px] tracking-[0.28em] text-white/45">
                 Luxury Timepieces
               </div>
             </Link>
 
-            <div className="flex items-center">
-              <Link
-                href="/admin"
-                className="rounded-full border border-white/15 px-5 py-2.5 text-sm text-white/70"
-              >
-                Admin
-              </Link>
-            </div>
+            <Link
+              href="/admin"
+              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
+            >
+              Admin
+            </Link>
+
           </div>
 
-          {/* SEARCH */}
-          <div className="mt-6">
-            <div className="flex h-[78px] items-center rounded-[22px] border border-white/15 bg-[#151310] px-5">
-              <Search className="mr-4 size-7 text-white/45" />
+          {/* FIXED SEARCH */}
+          <div className="mt-3">
+            <div className="flex h-[52px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
+
+              <Search className="mr-3 size-5 text-white/45" />
 
               <input
                 type="text"
                 placeholder="Search watches"
-                className="w-full bg-transparent text-lg text-white outline-none placeholder:text-white/40"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
               />
+
             </div>
           </div>
 
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="border-b border-white/10 px-5 py-4">
+      {/* SPACE FOR FIXED HEADER */}
+      <div className="h-[158px]" />
+
+      {/* HERO / NEW COLLECTION */}
+      <section className="border-b border-white/10 px-5 py-3">
+
         <div className="mx-auto max-w-7xl">
 
-          <div className="relative h-[320px] overflow-hidden rounded-[22px] border border-white/15 bg-[#17130f] px-6 py-6">
+          <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
             {/* WATCH DECORATION */}
-            <div className="pointer-events-none absolute -right-8 top-5 opacity-20">
-              <div className="relative h-64 w-44">
+            <div className="pointer-events-none absolute -right-7 top-0 opacity-20">
+              <div className="relative h-36 w-24">
 
-                <div className="absolute left-16 top-0 h-16 w-16 rounded-[20px] border-[9px] border-[#9b6b18]" />
+                <div className="absolute left-9 top-0 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
 
-                <div className="absolute left-2 top-12 h-36 w-36 rounded-full border-[9px] border-[#9b6b18]">
-                  <div className="absolute left-1/2 top-1/2 h-10 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+                <div className="absolute left-0 top-7 h-22 w-22 rounded-full border-[5px] border-[#9b6b18]">
+                  <div className="absolute left-1/2 top-1/2 h-6 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
                 </div>
 
-                <div className="absolute bottom-0 left-16 h-16 w-16 rounded-[20px] border-[9px] border-[#9b6b18]" />
+                <div className="absolute bottom-0 left-9 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
 
               </div>
             </div>
 
-            <div className="relative z-10 max-w-[72%]">
+            {/* HERO CONTENT */}
+            <div className="relative z-10 max-w-[70%]">
 
-              <p className="text-[9px] uppercase tracking-[0.35em] text-[#d8a84e]">
+              <p className="text-[6px] uppercase tracking-[0.32em] text-[#d8a84e]">
                 New Collection
               </p>
 
-              <h1 className="mt-4 font-serif text-[34px] font-light leading-[1.05] tracking-tight">
+              <h1 className="mt-1.5 max-w-[250px] font-serif text-[18px] font-light leading-[0.98] tracking-tight">
                 Timeless craftsmanship on your wrist
               </h1>
 
-              <p className="mt-4 text-[13px] leading-5 text-white/50">
+              <p className="mt-2 max-w-[230px] text-[7px] leading-3 text-white/50">
                 Hand-picked luxury watches, delivered with care.
               </p>
 
               <a
                 href="#collection"
-                className="mt-5 inline-flex rounded-full bg-[#f2b84b] px-6 py-3 text-[13px] font-medium text-black"
+                className="mt-2 inline-flex rounded-full bg-[#f2b84b] px-4 py-1.5 text-[8px] font-medium text-black"
               >
                 Explore Collection
               </a>
 
             </div>
+
           </div>
 
         </div>
+
       </section>
 
       {/* FEATURES */}
-      <section className="px-5 py-4">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4">
+      <section className="px-5 py-3">
 
-          <div className="flex h-[105px] items-center gap-4 rounded-[22px] border border-white/10 bg-[#151310] px-5">
-            <ShieldCheck className="size-8 shrink-0 text-[#d8a84e]" />
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
+
+          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
+
+            <ShieldCheck className="size-6 shrink-0 text-[#d8a84e]" />
 
             <div>
-              <div className="text-base font-medium">
+              <div className="text-sm font-medium">
                 Authentic
               </div>
 
-              <div className="mt-1 text-sm text-white/45">
+              <div className="mt-0.5 text-[10px] text-white/45">
                 100% genuine
               </div>
             </div>
+
           </div>
 
-          <div className="flex h-[105px] items-center gap-4 rounded-[22px] border border-white/10 bg-[#151310] px-5">
-            <Truck className="size-8 shrink-0 text-[#d8a84e]" />
+          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
+
+            <Truck className="size-6 shrink-0 text-[#d8a84e]" />
 
             <div>
-              <div className="text-base font-medium">
+              <div className="text-sm font-medium">
                 Fast Delivery
               </div>
 
-              <div className="mt-1 text-sm text-white/45">
+              <div className="mt-0.5 text-[10px] text-white/45">
                 Across India
               </div>
             </div>
+
           </div>
 
         </div>
+
       </section>
 
       {/* COLLECTION */}
       <section
         id="collection"
-        className="mx-auto max-w-7xl px-5 py-8"
+        className="mx-auto max-w-7xl px-5 py-7"
       >
 
-        <div className="mb-6 flex items-end justify-between">
+        <div className="mb-5 flex items-end justify-between">
 
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d8a84e]">
+
+            <p className="text-[9px] uppercase tracking-[0.3em] text-[#d8a84e]">
               Our Collection
             </p>
 
-            <h2 className="mt-2 font-serif text-3xl font-light">
+            <h2 className="mt-1.5 font-serif text-3xl font-light">
               All Watches
             </h2>
+
           </div>
 
           <span className="text-sm text-white/45">
@@ -168,17 +186,23 @@ export default function HomePage() {
         </div>
 
         {!ready ? (
+
           <div className="py-20 text-center text-white/50">
             Loading collection...
           </div>
+
         ) : products.length === 0 ? (
+
           <div className="rounded-2xl border border-white/10 py-20 text-center text-white/50">
             No products available.
           </div>
+
         ) : (
+
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 
             {products.map((product) => {
+
               const salePrice = discountedPrice(product)
 
               return (
@@ -245,6 +269,7 @@ export default function HomePage() {
             })}
 
           </div>
+
         )}
 
       </section>
@@ -267,7 +292,8 @@ export default function HomePage() {
       </footer>
 
       {/* MOBILE BOTTOM NAV */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
+      <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
+
         <div className="mx-auto grid max-w-md grid-cols-4">
 
           <Link
@@ -275,13 +301,16 @@ export default function HomePage() {
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
             <Sparkles className="size-6" />
-            <span className="text-xs">Home</span>
+            <span className="text-xs">
+              Home
+            </span>
           </Link>
 
           <Link
             href="/cart"
             className="relative flex flex-col items-center gap-1 py-3 text-white/50"
           >
+
             <ShoppingBag className="size-6" />
 
             {cartCount > 0 && (
@@ -290,28 +319,42 @@ export default function HomePage() {
               </span>
             )}
 
-            <span className="text-xs">Cart</span>
+            <span className="text-xs">
+              Cart
+            </span>
+
           </Link>
 
           <Link
             href="/history"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
+
             <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
               <div className="h-2 w-0.5 bg-current" />
             </div>
-            <span className="text-xs">History</span>
+
+            <span className="text-xs">
+              History
+            </span>
+
           </Link>
 
           <Link
             href="/my"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
+
             <div className="size-6 rounded-full border-2 border-current" />
-            <span className="text-xs">My</span>
+
+            <span className="text-xs">
+              My
+            </span>
+
           </Link>
 
         </div>
+
       </div>
 
     </main>
