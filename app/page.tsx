@@ -16,17 +16,25 @@ import { discountedPrice } from "@/lib/types"
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
 
+  const goToAdmin = () => {
+    window.location.href = "/admin"
+  }
+
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* ================= FIXED HEADER ================= */}
+      {/* ================================================= */}
+      {/* FIXED TOP HEADER */}
+      {/* ================================================= */}
+
       <header
-        className="fixed left-0 right-0 top-0 border-b border-white/10 bg-[#0b0a08]/98 backdrop-blur-xl"
+        className="fixed left-0 right-0 top-0 border-b border-white/10 bg-[#0b0a08]"
         style={{
           zIndex: 999999,
           pointerEvents: "auto",
         }}
       >
+
         <div className="mx-auto max-w-7xl px-5 py-2.5">
 
           <div className="flex items-center justify-between">
@@ -34,13 +42,13 @@ export default function HomePage() {
             {/* TIMEHUB */}
             <a
               href="/"
-              className="block"
+              className="relative block"
               style={{
-                position: "relative",
                 zIndex: 1000000,
                 pointerEvents: "auto",
               }}
             >
+
               <div className="text-[22px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
@@ -48,23 +56,24 @@ export default function HomePage() {
               <div className="mt-0.5 text-[9px] font-semibold tracking-[0.25em] text-white/75">
                 Luxury Timepieces
               </div>
+
             </a>
 
-            {/* ADMIN */}
-            <a
-              href="/admin"
+            {/* ADMIN BUTTON */}
+            <button
+              type="button"
               aria-label="Open Admin"
-              className="flex h-[40px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white/85"
+              onClick={goToAdmin}
+              className="relative flex h-[42px] min-w-[90px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white"
               style={{
-                position: "relative",
-                zIndex: 1000000,
+                zIndex: 1000001,
                 pointerEvents: "auto",
                 touchAction: "manipulation",
                 WebkitTapHighlightColor: "transparent",
               }}
             >
               Admin
-            </a>
+            </button>
 
           </div>
 
@@ -73,7 +82,7 @@ export default function HomePage() {
 
             <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
 
-              <Search className="mr-3 size-5 text-white/50" />
+              <Search className="mr-3 size-5 shrink-0 text-white/50" />
 
               <input
                 type="text"
@@ -86,25 +95,34 @@ export default function HomePage() {
           </div>
 
         </div>
+
       </header>
 
-      {/* HEADER SPACE */}
-      <div className="h-[122px]" />
 
-      {/* ================= HERO ================= */}
+      {/* SPACE BELOW FIXED HEADER */}
+      <div className="h-[158px]" />
+
+
+      {/* ================================================= */}
+      {/* HERO */}
+      {/* ================================================= */}
+
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
 
           <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
-            {/* WATCH */}
+            {/* WATCH DECORATION */}
+
             <div className="pointer-events-none absolute right-[-2px] top-[-8px] opacity-45">
 
               <div className="relative h-[176px] w-[125px]">
 
+                {/* TOP STRAP */}
                 <div className="absolute left-[43px] top-0 h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
+                {/* WATCH BODY */}
                 <div className="absolute left-[4px] top-[35px] h-[105px] w-[105px] rounded-full border-[7px] border-[#b47a18]">
 
                   <div className="absolute inset-[9px] rounded-full border-[2px] border-[#b47a18]/60">
@@ -117,15 +135,19 @@ export default function HomePage() {
 
                 </div>
 
+                {/* CROWN */}
                 <div className="absolute right-[-3px] top-[82px] h-[18px] w-[9px] rounded-r-md bg-[#b47a18]" />
 
+                {/* BOTTOM STRAP */}
                 <div className="absolute bottom-0 left-[43px] h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
               </div>
 
             </div>
 
-            {/* HERO CONTENT */}
+
+            {/* HERO TEXT */}
+
             <div className="relative z-10 max-w-[67%]">
 
               <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
@@ -155,57 +177,73 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= FEATURES ================= */}
+
+      {/* ================================================= */}
+      {/* AUTHENTIC + FAST DELIVERY */}
+      {/* ================================================= */}
+
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
+
           {/* AUTHENTIC */}
+
           <div
-            className="flex items-center gap-2 overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            className="!h-[44px] !min-h-[44px] !max-h-[44px] overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
             style={{
-              height: "42px",
-              minHeight: "42px",
-              maxHeight: "42px",
+              height: "44px",
+              minHeight: "44px",
+              maxHeight: "44px",
             }}
           >
 
-            <ShieldCheck className="size-[17px] shrink-0 text-[#d8a84e]" />
+            <div className="flex h-full items-center gap-2">
 
-            <div className="min-w-0">
+              <ShieldCheck className="size-[17px] shrink-0 text-[#d8a84e]" />
 
-              <div className="whitespace-nowrap text-[11px] font-medium leading-none">
-                Authentic
-              </div>
+              <div className="min-w-0">
 
-              <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
-                100% genuine
+                <div className="whitespace-nowrap text-[11px] font-medium leading-none">
+                  Authentic
+                </div>
+
+                <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
+                  100% genuine
+                </div>
+
               </div>
 
             </div>
 
           </div>
 
+
           {/* FAST DELIVERY */}
+
           <div
-            className="flex items-center gap-2 overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            className="!h-[44px] !min-h-[44px] !max-h-[44px] overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
             style={{
-              height: "42px",
-              minHeight: "42px",
-              maxHeight: "42px",
+              height: "44px",
+              minHeight: "44px",
+              maxHeight: "44px",
             }}
           >
 
-            <Truck className="size-[17px] shrink-0 text-[#d8a84e]" />
+            <div className="flex h-full items-center gap-2">
 
-            <div className="min-w-0">
+              <Truck className="size-[17px] shrink-0 text-[#d8a84e]" />
 
-              <div className="whitespace-nowrap text-[11px] font-medium leading-none">
-                Fast Delivery
-              </div>
+              <div className="min-w-0">
 
-              <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
-                Across India
+                <div className="whitespace-nowrap text-[11px] font-medium leading-none">
+                  Fast Delivery
+                </div>
+
+                <div className="mt-1 whitespace-nowrap text-[7px] leading-none text-white/50">
+                  Across India
+                </div>
+
               </div>
 
             </div>
@@ -216,7 +254,11 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= COLLECTION ================= */}
+
+      {/* ================================================= */}
+      {/* COLLECTION */}
+      {/* ================================================= */}
+
       <section
         id="collection"
         className="mx-auto max-w-7xl px-5 py-7"
@@ -242,6 +284,7 @@ export default function HomePage() {
 
         </div>
 
+
         {!ready ? (
 
           <div className="py-20 text-center text-white/50">
@@ -263,11 +306,14 @@ export default function HomePage() {
               const salePrice = discountedPrice(product)
 
               return (
+
                 <Link
                   key={product.id}
                   href={`/product/${product.id}`}
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] transition hover:border-[#d8a84e]/40"
                 >
+
+                  {/* PRODUCT IMAGE */}
 
                   <div className="relative aspect-square overflow-hidden bg-[#171512]">
 
@@ -280,12 +326,15 @@ export default function HomePage() {
                     />
 
                     {product.discount > 0 && (
+
                       <span className="absolute left-3 top-3 rounded-full bg-[#f2b84b] px-2 py-1 text-[10px] font-semibold text-black">
                         -{product.discount}%
                       </span>
+
                     )}
 
                     {product.stock <= 0 && (
+
                       <div className="absolute inset-0 flex items-center justify-center bg-black/60">
 
                         <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
@@ -293,9 +342,13 @@ export default function HomePage() {
                         </span>
 
                       </div>
+
                     )}
 
                   </div>
+
+
+                  {/* PRODUCT INFO */}
 
                   <div className="p-4">
 
@@ -314,9 +367,11 @@ export default function HomePage() {
                       </span>
 
                       {product.discount > 0 && (
+
                         <span className="text-xs text-white/35 line-through">
                           ₹{product.price.toLocaleString("en-IN")}
                         </span>
+
                       )}
 
                     </div>
@@ -324,7 +379,9 @@ export default function HomePage() {
                   </div>
 
                 </Link>
+
               )
+
             })}
 
           </div>
@@ -333,7 +390,11 @@ export default function HomePage() {
 
       </section>
 
-      {/* ================= FOOTER ================= */}
+
+      {/* ================================================= */}
+      {/* FOOTER */}
+      {/* ================================================= */}
+
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
@@ -350,23 +411,38 @@ export default function HomePage() {
 
       </footer>
 
-      {/* ================= BOTTOM NAV ================= */}
+
+      {/* ================================================= */}
+      {/* BOTTOM NAVIGATION */}
+      {/* ================================================= */}
+
       <div
         className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur"
-        style={{ zIndex: 99998 }}
+        style={{
+          zIndex: 99998,
+        }}
       >
 
         <div className="mx-auto grid max-w-md grid-cols-4">
+
+
+          {/* HOME */}
 
           <Link
             href="/"
             className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
           >
+
             <Sparkles className="size-6" />
+
             <span className="text-xs">
               Home
             </span>
+
           </Link>
+
+
+          {/* CART */}
 
           <Link
             href="/cart"
@@ -376,9 +452,11 @@ export default function HomePage() {
             <ShoppingBag className="size-6" />
 
             {cartCount > 0 && (
+
               <span className="absolute right-[28%] top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] text-black">
                 {cartCount}
               </span>
+
             )}
 
             <span className="text-xs">
@@ -387,13 +465,18 @@ export default function HomePage() {
 
           </Link>
 
+
+          {/* HISTORY */}
+
           <Link
             href="/history"
             className="flex flex-col items-center gap-1 py-3 text-white/50"
           >
 
             <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
+
               <div className="h-2 w-0.5 bg-current" />
+
             </div>
 
             <span className="text-xs">
@@ -401,6 +484,9 @@ export default function HomePage() {
             </span>
 
           </Link>
+
+
+          {/* MY */}
 
           <Link
             href="/my"
