@@ -37,6 +37,7 @@ export default function HomePage() {
               </div>
             </Link>
 
+            {/* TOP ADMIN */}
             <Link
               href="/admin"
               className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
@@ -49,6 +50,7 @@ export default function HomePage() {
           {/* SEARCH */}
           <div className="mt-3">
             <div className="flex h-[48px] items-center gap-3 rounded-2xl border border-white/15 bg-[#151310] px-4">
+
               <Search className="size-5 text-white/45" />
 
               <input
@@ -56,6 +58,7 @@ export default function HomePage() {
                 placeholder="Search watches"
                 className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
               />
+
             </div>
           </div>
 
@@ -66,40 +69,42 @@ export default function HomePage() {
       <section className="border-b border-white/10 px-5 py-3">
         <div className="mx-auto max-w-7xl">
 
-          <div className="relative min-h-[165px] overflow-hidden rounded-[22px] border border-white/15 bg-[#17130f] px-6 py-5">
+          <div className="relative min-h-[120px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-4">
 
             {/* WATCH DECORATION */}
-            <div className="pointer-events-none absolute -right-16 top-0 opacity-20">
-              <div className="relative h-40 w-36">
+            <div className="pointer-events-none absolute -right-14 -top-2 opacity-20">
+              <div className="relative h-32 w-28">
 
-                <div className="absolute left-12 top-0 h-12 w-12 rounded-[18px] border-[8px] border-[#9b6b18]" />
+                <div className="absolute left-9 top-0 h-10 w-10 rounded-[14px] border-[7px] border-[#9b6b18]" />
 
-                <div className="absolute left-2 top-8 h-24 w-24 rounded-full border-[8px] border-[#9b6b18]">
-                  <div className="absolute left-1/2 top-1/2 h-8 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+                <div className="absolute left-0 top-7 h-20 w-20 rounded-full border-[7px] border-[#9b6b18]">
+
+                  <div className="absolute left-1/2 top-1/2 h-7 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+
                 </div>
 
-                <div className="absolute bottom-0 left-12 h-12 w-12 rounded-[18px] border-[8px] border-[#9b6b18]" />
+                <div className="absolute bottom-0 left-9 h-10 w-10 rounded-[14px] border-[7px] border-[#9b6b18]" />
 
               </div>
             </div>
 
-            <div className="relative z-10 max-w-[80%]">
+            <div className="relative z-10 max-w-[82%]">
 
-              <p className="text-[8px] uppercase tracking-[0.35em] text-[#d8a84e]">
+              <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
                 New Collection
               </p>
 
-              <h1 className="mt-2 font-serif text-[25px] font-light leading-[1.05] tracking-tight sm:text-3xl">
+              <h1 className="mt-1 font-serif text-[21px] font-light leading-[1.02] tracking-tight sm:text-2xl">
                 Timeless craftsmanship on your wrist
               </h1>
 
-              <p className="mt-2 max-w-md text-[10px] leading-4 text-white/50">
+              <p className="mt-1.5 text-[9px] leading-3.5 text-white/50">
                 Hand-picked luxury watches, delivered with care.
               </p>
 
               <a
                 href="#collection"
-                className="mt-3 inline-flex rounded-full bg-[#f2b84b] px-5 py-2 text-[11px] font-medium text-black"
+                className="mt-2 inline-flex rounded-full bg-[#f2b84b] px-4 py-1.5 text-[10px] font-medium text-black"
               >
                 Explore Collection
               </a>
@@ -159,6 +164,7 @@ export default function HomePage() {
         <div className="mb-5 flex items-end justify-between">
 
           <div>
+
             <p className="text-[9px] uppercase tracking-[0.35em] text-[#d8a84e]">
               Our Collection
             </p>
@@ -166,6 +172,7 @@ export default function HomePage() {
             <h2 className="mt-1 font-serif text-3xl font-light">
               All Watches
             </h2>
+
           </div>
 
           <span className="text-sm text-white/45">
