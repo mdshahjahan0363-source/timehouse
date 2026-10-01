@@ -1,592 +1,331 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import {
-  ArrowLeft,
-  LogOut,
-  Package,
-  Pencil,
-  Plus,
+  Search,
   ShoppingBag,
-  Trash2,
+  ShieldCheck,
+  Truck,
+  Clock3,
+  User,
+  Home,
 } from "lucide-react"
 
-import type { Product } from "@/lib/types"
-import { discountedPrice } from "@/lib/types"
 import { useStore } from "@/lib/store"
-import { formatINR } from "@/lib/format"
-import { ProductForm } from "@/components/admin/product-form"
+import { discountedPrice } from "@/lib/types"
 
-type Tab = "products" | "orders"
-
-export default function AdminPage() {
-  const {
-    products,
-    orders,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    updateOrderStatus,
-  } = useStore()
-
-  const [authenticated, setAuthenticated] = useState(false)
-  const [checking, setChecking] = useState(true)
-  const [password, setPassword] = useState("")
-  const [loginError, setLoginError] = useState("")
-  const [activeTab, setActiveTab] = useState<Tab>("products")
-  const [editingProduct, setEditingProduct] =
-    useState<Product | undefined>(undefined)
-  const [showForm, setShowForm] = useState(false)
-
-  useEffect(() => {
-    async function checkSession() {
-      try {
-        const response = await fetch(
-          "/api/admin/session",
-          {
-            cache: "no-store",
-          }
-        )
-
-        setAuthenticated(response.ok)
-      } catch {
-        setAuthenticated(false)
-      } finally {
-        setChecking(false)
-      }
-    }
-
-    checkSession()
-  }, [])
-
-  async function login() {
-    setLoginError("")
-
-    if (!password.trim()) {
-      setLoginError("Password enter karein.")
-      return
-    }
-
-    try {
-      const response = await fetch(
-        "/api/admin/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            password,
-          }),
-        }
-      )
-
-      const data = await response
-        .json()
-        .catch(() => ({}))
-
-      if (!response.ok) {
-        setLoginError(
-          data.error || "Login failed."
-        )
-        return
-      }
-
-      setPassword("")
-      setAuthenticated(true)
-    } catch {
-      setLoginError(
-        "Login failed. Please try again."
-      )
-    }
-  }
-
-  async function logout() {
-    try {
-      await fetch(
-        "/api/admin/session",
-        {
-          method: "DELETE",
-        }
-      )
-    } catch {
-      // ignore
-    }
-
-    setAuthenticated(false)
-  }
-
-  function openAdd() {
-    setEditingProduct(undefined)
-    setShowForm(true)
-  }
-
-  function openEdit(product: Product) {
-    setEditingProduct(product)
-    setShowForm(true)
-  }
-
-  function closeForm() {
-    setEditingProduct(undefined)
-    setShowForm(false)
-  }
-
-  async function handleProductSubmit(
-    draft: Omit<Product, "id">
-  ) {
-    if (editingProduct) {
-      await updateProduct({
-        ...editingProduct,
-        ...draft,
-      })
-    } else {
-      await addProduct(draft)
-    }
-
-    closeForm()
-  }
-
-  async function handleDelete(
-    product: Product
-  ) {
-    const ok = window.confirm(
-      `"${product.name}" delete karna hai?`
-    )
-
-    if (!ok) return
-
-    await deleteProduct(product.id)
-  }
-
-  if (checking) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-5">
-        <div className="text-sm text-muted-foreground">
-          Checking admin access...
-        </div>
-      </main>
-    )
-  }
-
-  if (!authenticated) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-5">
-        <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Package className="size-6" />
-            </div>
-
-            <h1 className="text-xl font-semibold">
-              Admin Access
-            </h1>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Enter your admin password
-            </p>
-          </div>
-
-          <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              login()
-            }}
-            className="space-y-4"
-          >
-            <input
-              type="password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Admin password"
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
-              autoComplete="current-password"
-            />
-
-            {loginError && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600">
-                {loginError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
-            >
-              Sign In
-            </button>
-          </form>
-
-          <Link
-            href="/"
-            className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Back to store
-          </Link>
-        </div>
-      </main>
-    )
-  }
+export default function HomePage() {
+  const { products, cartCount, ready } = useStore()
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">
-              AURELIA Admin
-            </h1>
+    <main className="min-h-screen bg-[#0b0a08] pb-24 text-white">
 
-            <p className="text-xs text-muted-foreground">
-              Store management
-            </p>
-          </div>
+      {/* HEADER */}
+      <header className="border-b border-white/10 bg-[#0b0a08]">
+        <div className="mx-auto max-w-7xl px-5 py-4">
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="rounded-lg border border-border px-3 py-2 text-xs font-medium"
-            >
-              Store
+          <div className="flex items-center justify-between">
+
+            <Link href="/" className="block">
+              <div className="text-[24px] font-medium tracking-[0.24em]">
+                TIME<span className="text-[#d8a84e]">HUB</span>
+              </div>
+
+              <div className="mt-0.5 text-[10px] tracking-[0.28em] text-white/45">
+                Luxury Timepieces
+              </div>
             </Link>
 
-            <button
-              type="button"
-              onClick={logout}
-              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium"
+            {/* ONLY ADMIN — TOP CART REMOVED */}
+            <Link
+              href="/admin"
+              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
             >
-              <LogOut className="size-4" />
-              Logout
-            </button>
+              Admin
+            </Link>
+
           </div>
+
+          {/* SEARCH */}
+          <div className="mt-4">
+            <div className="flex h-[50px] items-center gap-3 rounded-2xl border border-white/15 bg-[#151310] px-4">
+              <Search className="size-5 text-white/45" />
+
+              <input
+                type="text"
+                placeholder="Search watches"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+              />
+            </div>
+          </div>
+
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() =>
-              setActiveTab("products")
-            }
-            className={`rounded-xl border p-4 text-left ${
-              activeTab === "products"
-                ? "border-primary bg-primary/5"
-                : "border-border bg-card"
-            }`}
-          >
-            <Package className="mb-2 size-5" />
+      {/* HERO */}
+      <section className="border-b border-white/10 px-5 py-4">
+        <div className="mx-auto max-w-7xl">
 
-            <div className="text-lg font-semibold">
-              {products.length}
+          <div className="relative min-h-[330px] overflow-hidden rounded-[26px] border border-white/15 bg-[#17130f] px-7 py-7">
+
+            {/* WATCH DECORATION */}
+            <div className="pointer-events-none absolute -right-20 top-2 opacity-20">
+              <div className="relative h-64 w-52">
+
+                <div className="absolute left-16 top-0 h-20 w-20 rounded-[28px] border-[13px] border-[#9b6b18]" />
+
+                <div className="absolute left-5 top-12 h-40 w-40 rounded-full border-[13px] border-[#9b6b18]">
+
+                  <div className="absolute left-1/2 top-1/2 h-12 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+
+                </div>
+
+                <div className="absolute bottom-0 left-16 h-20 w-20 rounded-[28px] border-[13px] border-[#9b6b18]" />
+
+              </div>
             </div>
 
-            <div className="text-xs text-muted-foreground">
-              Products
-            </div>
-          </button>
+            <div className="relative z-10 max-w-[78%]">
 
-          <button
-            type="button"
-            onClick={() =>
-              setActiveTab("orders")
-            }
-            className={`rounded-xl border p-4 text-left ${
-              activeTab === "orders"
-                ? "border-primary bg-primary/5"
-                : "border-border bg-card"
-            }`}
-          >
-            <ShoppingBag className="mb-2 size-5" />
+              <p className="text-[10px] uppercase tracking-[0.38em] text-[#d8a84e]">
+                New Collection
+              </p>
 
-            <div className="text-lg font-semibold">
-              {orders.length}
+              <h1 className="mt-4 font-serif text-[34px] font-light leading-[1.08] tracking-tight sm:text-4xl">
+                Timeless
+                <br />
+                craftsmanship
+                <br />
+                on your wrist
+              </h1>
+
+              <p className="mt-4 max-w-md text-xs leading-5 text-white/50">
+                Hand-picked luxury watches, delivered with care.
+              </p>
+
+              <a
+                href="#collection"
+                className="mt-5 inline-flex rounded-full bg-[#f2b84b] px-6 py-3 text-sm font-medium text-black"
+              >
+                Explore Collection
+              </a>
+
             </div>
 
-            <div className="text-xs text-muted-foreground">
-              Orders
+          </div>
+
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="px-5 py-3">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
+
+          <div className="flex h-[76px] items-center gap-3 rounded-[22px] border border-white/10 bg-[#151310] px-4">
+
+            <ShieldCheck className="size-7 shrink-0 text-[#d8a84e]" />
+
+            <div>
+              <div className="text-sm font-medium">
+                Authentic
+              </div>
+
+              <div className="mt-0.5 text-[11px] text-white/40">
+                100% genuine
+              </div>
             </div>
-          </button>
+
+          </div>
+
+          <div className="flex h-[76px] items-center gap-3 rounded-[22px] border border-white/10 bg-[#151310] px-4">
+
+            <Truck className="size-7 shrink-0 text-[#d8a84e]" />
+
+            <div>
+              <div className="text-sm font-medium">
+                Fast Delivery
+              </div>
+
+              <div className="mt-0.5 text-[11px] text-white/40">
+                Across India
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* COLLECTION */}
+      <section
+        id="collection"
+        className="mx-auto max-w-7xl px-5 pt-7"
+      >
+
+        <div className="mb-5 flex items-end justify-between">
+
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[#d8a84e]">
+              Our Collection
+            </p>
+
+            <h2 className="mt-1 font-serif text-3xl font-light">
+              All Watches
+            </h2>
+          </div>
+
+          <span className="text-sm text-white/45">
+            {products.length} items
+          </span>
+
         </div>
 
-        {activeTab === "products" && (
-          <>
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  Products
-                </h2>
+        {!ready ? (
+          <div className="py-16 text-center text-sm text-white/40">
+            Loading collection...
+          </div>
+        ) : products.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 py-16 text-center text-white/40">
+            No products available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
 
-                <p className="text-sm text-muted-foreground">
-                  Manage your watch collection
-                </p>
-              </div>
+            {products.map((product) => {
 
-              <button
-                type="button"
-                onClick={openAdd}
-                className="flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
-              >
-                <Plus className="size-4" />
-                Add Product
-              </button>
-            </div>
+              const salePrice = discountedPrice(product)
 
-            {/* ADD PRODUCT FORM */}
-            {showForm && !editingProduct && (
-              <div className="mb-6 rounded-2xl border border-border bg-card p-5">
-                <h3 className="mb-4 text-lg font-semibold">
-                  Add Product
-                </h3>
-
-                <ProductForm
-                  onSubmit={handleProductSubmit}
-                  onCancel={closeForm}
-                />
-              </div>
-            )}
-
-            {/* PRODUCTS */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <div
+              return (
+                <Link
                   key={product.id}
-                  className="min-w-0"
+                  href={`/product/${product.id}`}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-[#151310]"
                 >
-                  {/* PRODUCT CARD */}
-                  <div className="flex gap-3 rounded-2xl border border-border bg-card p-3">
-                    <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-secondary/30">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                          No image
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[11px] text-muted-foreground">
-                        {product.brand ||
-                          "AURELIA"}
-                      </div>
+                  <div className="relative aspect-square overflow-hidden bg-[#171512]">
 
-                      <h3 className="mt-1 truncate text-sm font-semibold">
-                        {product.name}
-                      </h3>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                      sizes="50vw"
+                    />
 
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-sm font-semibold">
-                          {formatINR(
-                            discountedPrice(product)
-                          )}
+                    {product.discount > 0 && (
+                      <span className="absolute left-3 top-3 rounded-full bg-[#f2b84b] px-3 py-1.5 text-[10px] font-semibold text-black">
+                        -{product.discount}%
+                      </span>
+                    )}
+
+                    {product.stock <= 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                        <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
+                          Out of stock
                         </span>
-
-                        {product.discount > 0 && (
-                          <span className="text-[10px] text-muted-foreground line-through">
-                            {formatINR(
-                              product.price
-                            )}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-1 text-[11px] text-muted-foreground">
-                        Stock: {product.stock}
-                      </div>
-
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openEdit(product)
-                          }
-                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-medium"
-                        >
-                          <Pencil className="size-3.5" />
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(product)
-                          }
-                          className="flex items-center justify-center rounded-lg border border-red-500/30 px-3 py-2 text-red-600"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* EDIT FORM - SAME PRODUCT KE NICHE */}
-                  {showForm &&
-                    editingProduct?.id ===
-                      product.id && (
-                      <div className="mt-3 rounded-2xl border border-primary/30 bg-card p-4">
-                        <h3 className="mb-4 text-lg font-semibold">
-                          Edit Product
-                        </h3>
-
-                        <ProductForm
-                          initial={
-                            editingProduct
-                          }
-                          onSubmit={
-                            handleProductSubmit
-                          }
-                          onCancel={closeForm}
-                        />
                       </div>
                     )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
 
-        {activeTab === "orders" && (
-          <section>
-            <div className="mb-5">
-              <h2 className="text-lg font-semibold">
-                Orders
-              </h2>
-
-              <p className="text-sm text-muted-foreground">
-                Manage customer orders
-              </p>
-            </div>
-
-            {orders.length === 0 ? (
-              <div className="rounded-2xl border border-border bg-card p-8 text-center">
-                <ShoppingBag className="mx-auto mb-3 size-8 text-muted-foreground" />
-
-                <p className="text-sm text-muted-foreground">
-                  No orders yet.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="rounded-2xl border border-border bg-card p-4"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <div className="font-semibold">
-                          Order #{order.id}
-                        </div>
-
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {new Date(
-                            order.createdAt
-                          ).toLocaleString(
-                            "en-IN"
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="font-semibold">
-                        {formatINR(
-                          order.amount
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      {order.items.map(
-                        (item) => (
-                          <div
-                            key={
-                              item.productId
-                            }
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span>
-                              {item.name} ×{" "}
-                              {item.quantity}
-                            </span>
-
-                            <span className="text-muted-foreground">
-                              {formatINR(
-                                item.price *
-                                  item.quantity
-                              )}
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <div className="mb-1 text-xs text-muted-foreground">
-                          Payment
-                        </div>
-
-                        <div className="text-sm font-medium">
-                          {order.paymentStatus}{" "}
-                          ·{" "}
-                          {order.paymentMethod}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="mb-1 text-xs text-muted-foreground">
-                          Order Status
-                        </div>
-
-                        <select
-                          value={
-                            order.orderStatus
-                          }
-                          onChange={(event) =>
-                            updateOrderStatus(
-                              order.id,
-                              event.target
-                                .value as typeof order.orderStatus
-                            )
-                          }
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                        >
-                          <option value="Pending">
-                            Pending
-                          </option>
-
-                          <option value="Confirmed">
-                            Confirmed
-                          </option>
-
-                          <option value="Shipped">
-                            Shipped
-                          </option>
-
-                          <option value="Delivered">
-                            Delivered
-                          </option>
-
-                          <option value="Cancelled">
-                            Cancelled
-                          </option>
-                        </select>
-                      </div>
-                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
+
+                  <div className="p-4">
+
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#d8a84e]">
+                      TIMEHUB
+                    </p>
+
+                    <h3 className="mt-2 line-clamp-2 min-h-10 text-sm">
+                      {product.name}
+                    </h3>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                      <span className="text-sm font-medium">
+                        ₹{salePrice.toLocaleString("en-IN")}
+                      </span>
+
+                      {product.discount > 0 && (
+                        <span className="text-[10px] text-white/35 line-through">
+                          ₹{product.price.toLocaleString("en-IN")}
+                        </span>
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </Link>
+              )
+            })}
+
+          </div>
         )}
-      </div>
+
+      </section>
+
+      {/* BOTTOM NAV */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#11100d]/95 backdrop-blur">
+
+        <div className="mx-auto grid max-w-2xl grid-cols-4">
+
+          <Link
+            href="/"
+            className="flex h-[74px] flex-col items-center justify-center gap-1 text-[#f2b84b]"
+          >
+            <Home className="size-6" />
+            <span className="text-[11px]">
+              Home
+            </span>
+          </Link>
+
+          <Link
+            href="/cart"
+            className="relative flex h-[74px] flex-col items-center justify-center gap-1 text-white/50"
+          >
+
+            <div className="relative">
+
+              <ShoppingBag className="size-6" />
+
+              {cartCount > 0 && (
+                <span className="absolute -right-3 -top-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] font-semibold text-black">
+                  {cartCount}
+                </span>
+              )}
+
+            </div>
+
+            <span className="text-[11px]">
+              Cart
+            </span>
+
+          </Link>
+
+          <Link
+            href="/history"
+            className="flex h-[74px] flex-col items-center justify-center gap-1 text-white/50"
+          >
+            <Clock3 className="size-6" />
+            <span className="text-[11px]">
+              History
+            </span>
+          </Link>
+
+          <Link
+            href="/my"
+            className="flex h-[74px] flex-col items-center justify-center gap-1 text-white/50"
+          >
+            <User className="size-6" />
+            <span className="text-[11px]">
+              My
+            </span>
+          </Link>
+
+        </div>
+
+      </nav>
+
     </main>
   )
 }
