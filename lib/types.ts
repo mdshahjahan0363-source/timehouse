@@ -24,9 +24,17 @@ export type Address = {
   pincode: string
 }
 
-export type PaymentMethod = "online" | "upi" | "netbanking"
+export type PaymentMethod =
+  | "online"
+  | "upi"
+  | "netbanking"
+  | "card"
+  | "emi"
 
-export type PaymentStatus = "paid" | "pending" | "failed"
+export type PaymentStatus =
+  | "paid"
+  | "pending"
+  | "failed"
 
 export type OrderStatus =
   | "Pending"
@@ -72,5 +80,8 @@ export const ORDER_STATUSES: OrderStatus[] = [
 
 export function discountedPrice(p: Product): number {
   if (!p.discount) return p.price
-  return Math.round(p.price * (1 - p.discount / 100))
+
+  return Math.round(
+    p.price * (1 - p.discount / 100)
+  )
 }
