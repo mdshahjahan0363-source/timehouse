@@ -23,10 +23,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
 
-      {/* ================================================= */}
-      {/* FIXED TOP HEADER */}
-      {/* ================================================= */}
-
+      {/* ================= FIXED HEADER ================= */}
       <header
         className="fixed left-0 right-0 top-0 border-b border-white/10 bg-[#0b0a08]"
         style={{
@@ -34,8 +31,7 @@ export default function HomePage() {
           pointerEvents: "auto",
         }}
       >
-
-        <div className="mx-auto max-w-7xl px-5 py-2.5">
+        <div className="mx-auto max-w-7xl px-5 py-1.5">
 
           <div className="flex items-center justify-between">
 
@@ -48,7 +44,6 @@ export default function HomePage() {
                 pointerEvents: "auto",
               }}
             >
-
               <div className="text-[22px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
@@ -56,20 +51,17 @@ export default function HomePage() {
               <div className="mt-0.5 text-[9px] font-semibold tracking-[0.25em] text-white/75">
                 Luxury Timepieces
               </div>
-
             </a>
 
-            {/* ADMIN BUTTON */}
+            {/* ADMIN */}
             <button
               type="button"
-              aria-label="Open Admin"
               onClick={goToAdmin}
-              className="relative flex h-[42px] min-w-[90px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white"
+              className="relative flex h-[40px] min-w-[90px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-5 text-sm text-white"
               style={{
                 zIndex: 1000001,
                 pointerEvents: "auto",
                 touchAction: "manipulation",
-                WebkitTapHighlightColor: "transparent",
               }}
             >
               Admin
@@ -78,9 +70,9 @@ export default function HomePage() {
           </div>
 
           {/* SEARCH */}
-          <div className="mt-2.5">
+          <div className="mt-1.5">
 
-            <div className="flex h-[44px] items-center rounded-[15px] border border-white/15 bg-[#151310] px-3">
+            <div className="flex h-[38px] items-center rounded-[13px] border border-white/15 bg-[#151310] px-3">
 
               <Search className="mr-3 size-5 shrink-0 text-white/50" />
 
@@ -95,34 +87,26 @@ export default function HomePage() {
           </div>
 
         </div>
-
       </header>
 
-
       {/* SPACE BELOW FIXED HEADER */}
-      <div className="h-[158px]" />
+      <div className="h-[112px]" />
 
 
-      {/* ================================================= */}
-      {/* HERO */}
-      {/* ================================================= */}
-
+      {/* ================= HERO ================= */}
       <section className="border-b border-white/10 px-5 py-3">
 
         <div className="mx-auto max-w-7xl">
 
           <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
-            {/* WATCH DECORATION */}
-
+            {/* WATCH */}
             <div className="pointer-events-none absolute right-[-2px] top-[-8px] opacity-45">
 
               <div className="relative h-[176px] w-[125px]">
 
-                {/* TOP STRAP */}
                 <div className="absolute left-[43px] top-0 h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
-                {/* WATCH BODY */}
                 <div className="absolute left-[4px] top-[35px] h-[105px] w-[105px] rounded-full border-[7px] border-[#b47a18]">
 
                   <div className="absolute inset-[9px] rounded-full border-[2px] border-[#b47a18]/60">
@@ -135,19 +119,15 @@ export default function HomePage() {
 
                 </div>
 
-                {/* CROWN */}
                 <div className="absolute right-[-3px] top-[82px] h-[18px] w-[9px] rounded-r-md bg-[#b47a18]" />
 
-                {/* BOTTOM STRAP */}
                 <div className="absolute bottom-0 left-[43px] h-[45px] w-[40px] rounded-[13px] border-[6px] border-[#b47a18]" />
 
               </div>
 
             </div>
 
-
             {/* HERO TEXT */}
-
             <div className="relative z-10 max-w-[67%]">
 
               <p className="text-[7px] uppercase tracking-[0.32em] text-[#d8a84e]">
@@ -178,19 +158,14 @@ export default function HomePage() {
       </section>
 
 
-      {/* ================================================= */}
-      {/* AUTHENTIC + FAST DELIVERY */}
-      {/* ================================================= */}
-
+      {/* ================= FEATURES ================= */}
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
 
-
           {/* AUTHENTIC */}
-
           <div
-            className="!h-[44px] !min-h-[44px] !max-h-[44px] overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            className="overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
             style={{
               height: "44px",
               minHeight: "44px",
@@ -220,9 +195,8 @@ export default function HomePage() {
 
 
           {/* FAST DELIVERY */}
-
           <div
-            className="!h-[44px] !min-h-[44px] !max-h-[44px] overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
+            className="overflow-hidden rounded-[12px] border border-white/10 bg-[#151310] px-3"
             style={{
               height: "44px",
               minHeight: "44px",
@@ -255,10 +229,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* ================================================= */}
-      {/* COLLECTION */}
-      {/* ================================================= */}
-
+      {/* ================= COLLECTION ================= */}
       <section
         id="collection"
         className="mx-auto max-w-7xl px-5 py-7"
@@ -313,8 +284,6 @@ export default function HomePage() {
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] transition hover:border-[#d8a84e]/40"
                 >
 
-                  {/* PRODUCT IMAGE */}
-
                   <div className="relative aspect-square overflow-hidden bg-[#171512]">
 
                     <Image
@@ -347,8 +316,6 @@ export default function HomePage() {
 
                   </div>
 
-
-                  {/* PRODUCT INFO */}
 
                   <div className="p-4">
 
@@ -391,10 +358,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* ================================================= */}
-      {/* FOOTER */}
-      {/* ================================================= */}
-
+      {/* ================= FOOTER ================= */}
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
@@ -406,105 +370,4 @@ export default function HomePage() {
         </p>
 
         <p className="mt-5 text-[11px] text-white/30">
-          © {new Date().getFullYear()} TimeHub. All rights reserved.
-        </p>
-
-      </footer>
-
-
-      {/* ================================================= */}
-      {/* BOTTOM NAVIGATION */}
-      {/* ================================================= */}
-
-      <div
-        className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur"
-        style={{
-          zIndex: 99998,
-        }}
-      >
-
-        <div className="mx-auto grid max-w-md grid-cols-4">
-
-
-          {/* HOME */}
-
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
-          >
-
-            <Sparkles className="size-6" />
-
-            <span className="text-xs">
-              Home
-            </span>
-
-          </Link>
-
-
-          {/* CART */}
-
-          <Link
-            href="/cart"
-            className="relative flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <ShoppingBag className="size-6" />
-
-            {cartCount > 0 && (
-
-              <span className="absolute right-[28%] top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] text-black">
-                {cartCount}
-              </span>
-
-            )}
-
-            <span className="text-xs">
-              Cart
-            </span>
-
-          </Link>
-
-
-          {/* HISTORY */}
-
-          <Link
-            href="/history"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
-
-              <div className="h-2 w-0.5 bg-current" />
-
-            </div>
-
-            <span className="text-xs">
-              History
-            </span>
-
-          </Link>
-
-
-          {/* MY */}
-
-          <Link
-            href="/my"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="size-6 rounded-full border-2 border-current" />
-
-            <span className="text-xs">
-              My
-            </span>
-
-          </Link>
-
-        </div>
-
-      </div>
-
-    </main>
-  )
-}
+          © {new
