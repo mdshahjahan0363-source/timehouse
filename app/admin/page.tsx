@@ -1,362 +1,795 @@
 "use client"
 
+import { useEffect, useState, type ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
+  ArrowLeft,
+  Plus,
+  Pencil,
+  Trash2,
+  Package,
   ShoppingBag,
-  ShieldCheck,
-  Truck,
-  Sparkles,
-  Search,
+  LogOut,
+  Lock,
+  Loader2,
+  X,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
-import { discountedPrice } from "@/lib/types"
+import type { Product, OrderStatus } from "@/lib/types"
+import {
+  ORDER_STATUSES,
+  discountedPrice,
+} from "@/lib/types"
+import { formatINR, formatDate } from "@/lib/format"
+import { Field, TextInput } from "@/components/ui/field"
+import { ProductForm } from "@/components/admin/product-form"
+import {
+  PaymentBadge,
+  OrderStatusBadge,
+  StockBadge,
+} from "@/components/status-badge"
+import {
+  Spinner,
+  EmptyState,
+} from "@/components/state-views"
+import { useToast } from "@/lib/toast"
+import { cn } from "@/lib/utils"
 
-export default function HomePage() {
-  const { products, cartCount, ready } = useStore()
+type Tab = "products" | "orders"
+
+export default function AdminPage() {
+  const [checking, setChecking] = useState(true)
+  const [authed, setAuthed] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/admin/session")
+      .then((res) => res.json())
+      .then((data) => {
+        setAuthed(Boolean(data.authenticated))
+      })
+      .catch(() => {
+        setAuthed(false)
+      })
+      .finally(() => {
+        setChecking(false)
+      })
+  }, [])
+
+  if (checking) {
+    return (
+      <main className="min-h-dvh bg-background">
+        <Spinner label="Checking access..." />
+      </main>
+    )
+  }
+
+  if (!authed) {
+    return (
+      <AdminLogin
+        onSuccess={() => setAuthed(true)}
+      />
+    )
+  }
 
   return (
-    <main className="min-h-screen bg-[#0b0a08] text-white">
+    <AdminDashboard
+      onLogout={() => setAuthed(false)}
+    />
+  )
+}
 
-      {/* FIXED HEADER */}
-      <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-5 py-4">
+function AdminLogin({
+  onSuccess,
+}: {
+  onSuccess: () => void
+}) {
+  const toast = useToast()
 
-          {/* BRAND + ADMIN */}
-          <div className="flex items-center justify-between">
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
 
-            <Link href="/" className="block">
-              <div className="text-[25px] font-medium tracking-[0.20em]">
-                TIME<span className="text-[#d8a84e]">HUB</span>
+  async function submit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault()
+
+    if (!password.trim()) {
+      toast("Enter admin password", "error")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        "/api/admin/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            password,
+          }),
+        },
+      )
+
+      const data = await response
+        .json()
+        .catch(() => ({}))
+
+      if (response.ok) {
+        toast(
+          "Welcome back, admin",
+          "success",
+        )
+
+        onSuccess()
+      } else {
+        toast(
+          data.error || "Invalid password",
+          "error",
+        )
+      }
+    } catch {
+      toast(
+        "Login failed. Try again.",
+        "error",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="flex min-h-dvh items-center justify-center bg-background px-6">
+      <div className="w-full max-w-md">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+          <Lock className="size-8" />
+        </div>
+
+        <h1 className="mt-5 text-center font-serif text-2xl text-foreground">
+          Admin Access
+        </h1>
+
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Enter your password to manage the store.
+        </p>
+
+        <form
+          onSubmit={submit}
+          className="mt-6 space-y-4"
+        >
+          <Field
+            label="Password"
+            htmlFor="admin-password"
+          >
+            <TextInput
+              id="admin-password"
+              type="password"
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
+              placeholder="Admin password"
+              autoFocus
+            />
+          </Field>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          >
+            {loading && (
+              <Loader2 className="size-4 animate-spin" />
+            )}
+
+            Sign In
+          </button>
+        </form>
+
+        <Link
+          href="/"
+          className="mt-5 block text-center text-xs text-muted-foreground"
+        >
+          Back to store
+        </Link>
+      </div>
+    </main>
+  )
+}
+
+function AdminDashboard({
+  onLogout,
+}: {
+  onLogout: () => void
+}) {
+  const toast = useToast()
+
+  const {
+    ready,
+    products,
+    orders,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    updateOrderStatus,
+  } = useStore()
+
+  const [tab, setTab] =
+    useState<Tab>("products")
+
+  const [editing, setEditing] =
+    useState<Product | null>(null)
+
+  const [creating, setCreating] =
+    useState(false)
+
+  const [confirmDelete, setConfirmDelete] =
+    useState<Product | null>(null)
+
+  const revenue = orders
+    .filter(
+      (order) =>
+        order.paymentStatus === "paid",
+    )
+    .reduce(
+      (total, order) =>
+        total + order.amount,
+      0,
+    )
+
+  async function logout() {
+    await fetch(
+      "/api/admin/session",
+      {
+        method: "DELETE",
+      },
+    ).catch(() => {})
+
+    toast("Logged out", "info")
+    onLogout()
+  }
+
+  const showForm =
+    creating || editing !== null
+
+  return (
+    <main className="min-h-dvh bg-background pb-10">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto max-w-md">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="flex size-9 items-center justify-center rounded-full border border-border"
+                aria-label="Back to store"
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
+
+              <div>
+                <h1 className="font-serif text-lg">
+                  Admin Panel
+                </h1>
+
+                <p className="text-[11px] text-muted-foreground">
+                  TIMEHUB
+                </p>
               </div>
-
-              <div className="mt-0.5 text-[9px] tracking-[0.28em] text-white/45">
-                Luxury Timepieces
-              </div>
-            </Link>
-
-            <Link
-              href="/admin"
-              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70"
-            >
-              Admin
-            </Link>
-
-          </div>
-
-          {/* FIXED SEARCH */}
-          <div className="mt-3">
-            <div className="flex h-[52px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
-
-              <Search className="mr-3 size-5 text-white/45" />
-
-              <input
-                type="text"
-                placeholder="Search watches"
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
-              />
-
             </div>
+
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs"
+            >
+              <LogOut className="size-3.5" />
+              Logout
+            </button>
           </div>
 
+          <div className="grid grid-cols-3 gap-2 px-4 pb-3">
+            <Stat
+              label="Products"
+              value={String(products.length)}
+            />
+
+            <Stat
+              label="Orders"
+              value={String(orders.length)}
+            />
+
+            <Stat
+              label="Revenue"
+              value={formatINR(revenue)}
+            />
+          </div>
+
+          <div className="flex border-t border-border">
+            <TabButton
+              active={tab === "products"}
+              onClick={() =>
+                setTab("products")
+              }
+            >
+              <Package className="size-4" />
+              Products
+            </TabButton>
+
+            <TabButton
+              active={tab === "orders"}
+              onClick={() =>
+                setTab("orders")
+              }
+            >
+              <ShoppingBag className="size-4" />
+              Orders
+            </TabButton>
+          </div>
         </div>
       </header>
 
-      {/* SPACE FOR FIXED HEADER */}
-      <div className="h-[158px]" />
-
-      {/* HERO / NEW COLLECTION */}
-      <section className="border-b border-white/10 px-5 py-3">
-
-        <div className="mx-auto max-w-7xl">
-
-          <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
-
-            {/* WATCH DECORATION */}
-            <div className="pointer-events-none absolute -right-7 top-0 opacity-20">
-              <div className="relative h-36 w-24">
-
-                <div className="absolute left-9 top-0 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
-
-                <div className="absolute left-0 top-7 h-22 w-22 rounded-full border-[5px] border-[#9b6b18]">
-                  <div className="absolute left-1/2 top-1/2 h-6 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
-                </div>
-
-                <div className="absolute bottom-0 left-9 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
-
-              </div>
-            </div>
-
-            {/* HERO CONTENT */}
-            <div className="relative z-10 max-w-[70%]">
-
-              <p className="text-[6px] uppercase tracking-[0.32em] text-[#d8a84e]">
-                New Collection
-              </p>
-
-              <h1 className="mt-1.5 max-w-[250px] font-serif text-[18px] font-light leading-[0.98] tracking-tight">
-                Timeless craftsmanship on your wrist
-              </h1>
-
-              <p className="mt-2 max-w-[230px] text-[7px] leading-3 text-white/50">
-                Hand-picked luxury watches, delivered with care.
-              </p>
-
-              <a
-                href="#collection"
-                className="mt-2 inline-flex rounded-full bg-[#f2b84b] px-4 py-1.5 text-[8px] font-medium text-black"
-              >
-                Explore Collection
-              </a>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* FEATURES */}
-      <section className="px-5 py-3">
-
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
-
-          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
-
-            <ShieldCheck className="size-6 shrink-0 text-[#d8a84e]" />
-
-            <div>
-              <div className="text-sm font-medium">
-                Authentic
-              </div>
-
-              <div className="mt-0.5 text-[10px] text-white/45">
-                100% genuine
-              </div>
-            </div>
-
-          </div>
-
-          <div className="flex h-[78px] items-center gap-3 rounded-[18px] border border-white/10 bg-[#151310] px-4">
-
-            <Truck className="size-6 shrink-0 text-[#d8a84e]" />
-
-            <div>
-              <div className="text-sm font-medium">
-                Fast Delivery
-              </div>
-
-              <div className="mt-0.5 text-[10px] text-white/45">
-                Across India
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* COLLECTION */}
-      <section
-        id="collection"
-        className="mx-auto max-w-7xl px-5 py-7"
-      >
-
-        <div className="mb-5 flex items-end justify-between">
-
-          <div>
-
-            <p className="text-[9px] uppercase tracking-[0.3em] text-[#d8a84e]">
-              Our Collection
-            </p>
-
-            <h2 className="mt-1.5 font-serif text-3xl font-light">
-              All Watches
-            </h2>
-
-          </div>
-
-          <span className="text-sm text-white/45">
-            {products.length} items
-          </span>
-
-        </div>
-
+      <div className="mx-auto max-w-md">
         {!ready ? (
-
-          <div className="py-20 text-center text-white/50">
-            Loading collection...
-          </div>
-
-        ) : products.length === 0 ? (
-
-          <div className="rounded-2xl border border-white/10 py-20 text-center text-white/50">
-            No products available.
-          </div>
-
+          <Spinner label="Loading..." />
+        ) : tab === "products" ? (
+          <ProductsSection
+            products={products}
+            onAdd={() =>
+              setCreating(true)
+            }
+            onEdit={(product) =>
+              setEditing(product)
+            }
+            onDelete={(product) =>
+              setConfirmDelete(product)
+            }
+          />
         ) : (
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-
-            {products.map((product) => {
-
-              const salePrice = discountedPrice(product)
-
-              return (
-                <Link
-                  key={product.id}
-                  href={`/product/${product.id}`}
-                  className="group overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] transition hover:border-[#d8a84e]/40"
-                >
-
-                  <div className="relative aspect-square overflow-hidden bg-[#171512]">
-
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
-
-                    {product.discount > 0 && (
-                      <span className="absolute left-3 top-3 rounded-full bg-[#f2b84b] px-2 py-1 text-[10px] font-semibold text-black">
-                        -{product.discount}%
-                      </span>
-                    )}
-
-                    {product.stock <= 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                        <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
-                          Out of stock
-                        </span>
-                      </div>
-                    )}
-
-                  </div>
-
-                  <div className="p-4">
-
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#d8a84e]">
-                      {product.brand || "TIMEHUB"}
-                    </p>
-
-                    <h3 className="mt-2 line-clamp-2 min-h-10 text-sm text-white">
-                      {product.name}
-                    </h3>
-
-                    <div className="mt-3 flex items-center gap-2">
-
-                      <span className="font-medium">
-                        ₹{salePrice.toLocaleString("en-IN")}
-                      </span>
-
-                      {product.discount > 0 && (
-                        <span className="text-xs text-white/35 line-through">
-                          ₹{product.price.toLocaleString("en-IN")}
-                        </span>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                </Link>
+          <OrdersSection
+            orders={orders}
+            onStatusChange={(
+              orderId,
+              status,
+            ) => {
+              updateOrderStatus(
+                orderId,
+                status,
               )
-            })}
 
-          </div>
-
+              toast(
+                `Order marked ${status}`,
+                "success",
+              )
+            }}
+          />
         )}
-
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-white/10 px-5 py-10 text-center">
-
-        <p className="text-lg tracking-[0.2em]">
-          TIME<span className="text-[#d8a84e]">HUB</span>
-        </p>
-
-        <p className="mt-2 text-xs text-white/40">
-          Luxury Timepieces
-        </p>
-
-        <p className="mt-5 text-[11px] text-white/30">
-          © {new Date().getFullYear()} TimeHub. All rights reserved.
-        </p>
-
-      </footer>
-
-      {/* MOBILE BOTTOM NAV */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur">
-
-        <div className="mx-auto grid max-w-md grid-cols-4">
-
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
-          >
-            <Sparkles className="size-6" />
-            <span className="text-xs">
-              Home
-            </span>
-          </Link>
-
-          <Link
-            href="/cart"
-            className="relative flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <ShoppingBag className="size-6" />
-
-            {cartCount > 0 && (
-              <span className="absolute right-[28%] top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] text-black">
-                {cartCount}
-              </span>
-            )}
-
-            <span className="text-xs">
-              Cart
-            </span>
-
-          </Link>
-
-          <Link
-            href="/history"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
-              <div className="h-2 w-0.5 bg-current" />
-            </div>
-
-            <span className="text-xs">
-              History
-            </span>
-
-          </Link>
-
-          <Link
-            href="/my"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="size-6 rounded-full border-2 border-current" />
-
-            <span className="text-xs">
-              My
-            </span>
-
-          </Link>
-
-        </div>
-
       </div>
 
+      {showForm && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/70 backdrop-blur-sm">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl border-t border-border bg-popover p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-serif text-lg">
+                {editing
+                  ? "Edit Product"
+                  : "Add Product"}
+              </h2>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null)
+                  setCreating(false)
+                }}
+                className="flex size-8 items-center justify-center rounded-full border border-border"
+                aria-label="Close"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <ProductForm
+              initial={
+                editing ?? undefined
+              }
+              onCancel={() => {
+                setEditing(null)
+                setCreating(false)
+              }}
+              onSubmit={(draft) => {
+                if (editing) {
+                  updateProduct({
+                    ...draft,
+                    id: editing.id,
+                  })
+
+                  toast(
+                    "Product updated",
+                    "success",
+                  )
+                } else {
+                  addProduct(draft)
+
+                  toast(
+                    "Product added",
+                    "success",
+                  )
+                }
+
+                setEditing(null)
+                setCreating(false)
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-popover p-5 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+              <Trash2 className="size-6" />
+            </div>
+
+            <h3 className="mt-3 font-serif text-lg">
+              Delete product?
+            </h3>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              {confirmDelete.name} will be permanently removed.
+            </p>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setConfirmDelete(null)
+                }
+                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-semibold"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  deleteProduct(
+                    confirmDelete.id,
+                  )
+
+                  toast(
+                    "Product deleted",
+                    "info",
+                  )
+
+                  setConfirmDelete(null)
+                }}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
+  )
+}
+
+function ProductsSection({
+  products,
+  onAdd,
+  onEdit,
+  onDelete,
+}: {
+  products: Product[]
+  onAdd: () => void
+  onEdit: (product: Product) => void
+  onDelete: (product: Product) => void
+}) {
+  return (
+    <section className="px-4 pt-4">
+      <button
+        type="button"
+        onClick={onAdd}
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-semibold text-primary"
+      >
+        <Plus className="size-4" />
+        Add New Product
+      </button>
+
+      {products.length === 0 ? (
+        <EmptyState
+          icon={
+            <Package className="size-7" />
+          }
+          title="No products"
+          description="Add your first watch to the catalog."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {products.map((product) => (
+            <li
+              key={product.id}
+              className="flex gap-3 rounded-2xl border border-border bg-card p-3"
+            >
+              <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-secondary/40">
+                <Image
+                  src={
+                    product.image ||
+                    "/placeholder.svg"
+                  }
+                  alt={product.name}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h3 className="line-clamp-1 text-sm font-medium">
+                  {product.name}
+                </h3>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">
+                    {formatINR(
+                      discountedPrice(
+                        product,
+                      ),
+                    )}
+                  </span>
+
+                  {product.discount > 0 && (
+                    <span className="text-[10px] text-primary">
+                      -{product.discount}%
+                    </span>
+                  )}
+                </div>
+
+                <StockBadge
+                  stock={product.stock}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onEdit(product)
+                  }
+                  className="flex size-8 items-center justify-center rounded-lg border border-border"
+                  aria-label="Edit product"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    onDelete(product)
+                  }
+                  className="flex size-8 items-center justify-center rounded-lg border border-border text-destructive"
+                  aria-label="Delete product"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+function OrdersSection({
+  orders,
+  onStatusChange,
+}: {
+  orders: Array<{
+    id: string
+    createdAt: number
+    items: Array<{
+      productId: string
+      name: string
+      price: number
+      quantity: number
+    }>
+    amount: number
+    address: {
+      fullName: string
+      mobile: string
+      address: string
+      city: string
+      state: string
+      pincode: string
+    }
+    paymentStatus:
+      | "paid"
+      | "pending"
+      | "failed"
+    orderStatus: OrderStatus
+  }>
+  onStatusChange: (
+    id: string,
+    status: OrderStatus,
+  ) => void
+}) {
+  return (
+    <section className="px-4 pt-4">
+      {orders.length === 0 ? (
+        <EmptyState
+          icon={
+            <ShoppingBag className="size-7" />
+          }
+          title="No orders yet"
+          description="Customer orders will appear here."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {orders.map((order) => (
+            <li
+              key={order.id}
+              className="rounded-2xl border border-border bg-card p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-mono text-xs">
+                    #{order.id}
+                  </p>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    {formatDate(
+                      order.createdAt,
+                    )}
+                  </p>
+                </div>
+
+                <PaymentBadge
+                  status={
+                    order.paymentStatus
+                  }
+                />
+              </div>
+
+              <div className="mt-3 space-y-2 border-t border-border pt-3">
+                {order.items.map(
+                  (item) => (
+                    <div
+                      key={item.productId}
+                      className="flex justify-between text-xs"
+                    >
+                      <span className="line-clamp-1 text-muted-foreground">
+                        {item.name} ×{" "}
+                        {item.quantity}
+                      </span>
+
+                      <span>
+                        {formatINR(
+                          item.price *
+                            item.quantity,
+                        )}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+
+              <div className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  {order.address.fullName}
+                  {" · +91 "}
+                  {order.address.mobile}
+                </p>
+
+                <p>
+                  {order.address.address},{" "}
+                  {order.address.city},{" "}
+                  {order.address.state} -{" "}
+                  {order.address.pincode}
+                </p>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                <span className="font-semibold">
+                  {formatINR(
+                    order.amount,
+                  )}
+                </span>
+
+                <OrderStatusBadge
+                  status={
+                    order.orderStatus
+                  }
+                />
+              </div>
+
+              <div className="mt-3">
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Update Order Status
+                </p>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {ORDER_STATUSES.map(
+                    (status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() =>
+                          onStatusChange(
+                            order.id,
+                            status,
+                          )
+                        }
+                        className={cn(
+                          "rounded-full border px-3 py-1 text-[11px] font-medium",
+                          order.orderStatus ===
+                            status
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border text-muted-foreground",
+                        )}
+                      >
+                        {status}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+function Stat({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+
+      <p className="truncate text-sm font-semibold">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-medium",
+        active
+          ? "border-primary text-foreground"
+          : "border-transparent text-muted-foreground",
+      )}
+    >
+      {children}
+    </button>
   )
 }
