@@ -2,16 +2,41 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, CreditCard, ShieldCheck } from "lucide-react"
+import {
+  ArrowLeft,
+  CreditCard,
+  ShieldCheck,
+  Smartphone,
+  Landmark,
+  WalletCards,
+  Banknote,
+} from "lucide-react"
 
 import { useStore } from "@/lib/store"
 import { discountedPrice } from "@/lib/types"
 import { formatINR } from "@/lib/format"
 
+type PaymentChoice =
+  | "online"
+  | "upi"
+  | "netbanking"
+  | "card"
+  | "emi"
+
+declare global {
+  interface Window {
+    Razorpay: new (options: any) => {
+      open: () => void
+    }
+  }
+}
+
 export default function CheckoutPage() {
   const { products, cart, cartTotal, ready } = useStore()
 
   const [loading, setLoading] = useState(false)
+  const [selectedMethod, setSelectedMethod] =
+    useState<PaymentChoice>("online")
 
   const [form, setForm] = useState({
     fullName: "",
@@ -85,7 +110,53 @@ export default function CheckoutPage() {
     }))
   }
 
-  async function handlePayment() {
+  function getRazorpayConfig(method: PaymentChoice) {
+    if (method === "online") {
+      return undefined
+    }
+
+    const methodMap: Record<
+      Exclude<PaymentChoice, "online">,
+      string
+    > = {
+      upi: "upi",
+      netbanking: "netbanking",
+      card: "card",
+      emi: "emi",
+    }
+
+    const razorpayMethod = methodMap[method]
+
+    return {
+      display: {
+        blocks: {
+          selected: {
+            name:
+              method === "upi"
+                ? "Pay using UPI"
+                : method === "netbanking"
+                  ? "Pay using Net Banking"
+                  : method === "card"
+                    ? "Pay using Debit / Credit Card"
+                    : "Pay using EMI",
+            instruments: [
+              {
+                method: razorpayMethod,
+              },
+            ],
+          },
+        },
+        sequence: ["block.selected"],
+        preferences: {
+          show_default_blocks: false,
+        },
+      },
+    }
+  }
+
+  async function handlePayment(
+    method: PaymentChoice = selectedMethod
+  ) {
     if (
       !form.fullName ||
       !form.mobile ||
@@ -100,6 +171,7 @@ export default function CheckoutPage() {
 
     try {
       setLoading(true)
+      setSelectedMethod(method)
 
       const response = await fetch(
         "/api/razorpay/order",
@@ -118,46 +190,71 @@ export default function CheckoutPage() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "Unable to create payment order"
+          data?.error ||
+            "Unable to create payment order"
         )
       }
 
-      const script = document.createElement("script")
-      script.src =
-        "https://checkout.razorpay.com/v1/checkout.js"
+      if (!data.keyId) {
+        throw new Error(
+          "Razorpay key is not configured"
+        )
+      }
 
-      script.onload = () => {
-        const Razorpay = (
-          window as unknown as {
-            Razorpay: new (options: unknown) => {
-              open: () => void
-            }
-          }
-        ).Razorpay
+      const existingScript = document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      )
 
-        const checkout = new Razorpay({
-          key:
-            process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      const openCheckout = () => {
+        if (!window.Razorpay) {
+          setLoading(false)
+          alert("Razorpay could not be loaded.")
+          return
+        }
+
+        const checkout = new window.Razorpay({
+          key: data.keyId,
           amount: data.amount,
           currency: data.currency || "INR",
+
           name: "AURELIA",
           description: "Luxury Timepiece",
+
           order_id: data.orderId,
 
-          handler: async function (
-            payment: {
-              razorpay_payment_id: string
-              razorpay_order_id: string
-              razorpay_signature: string
-            }
-          ) {
+          config: getRazorpayConfig(method),
+
+          prefill: {
+            name: form.fullName,
+            contact: form.mobile,
+          },
+
+          notes: {
+            customer_name: form.fullName,
+            mobile: form.mobile,
+            city: form.city,
+            state: form.state,
+            pincode: form.pincode,
+            payment_method: method,
+          },
+
+          theme: {
+            color: "#f2b84b",
+          },
+
+          handler: async function (payment: {
+            razorpay_payment_id: string
+            razorpay_order_id: string
+            razorpay_signature: string
+          }) {
             try {
               const verifyResponse = await fetch(
                 "/api/razorpay/verify",
                 {
                   method: "POST",
                   headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type":
+                      "application/json",
                   },
                   body: JSON.stringify({
                     razorpay_payment_id:
@@ -184,21 +281,15 @@ export default function CheckoutPage() {
                 "/?payment=success"
             } catch (error) {
               console.error(error)
+
               alert(
-                "Payment verification failed. Please contact support."
+                error instanceof Error
+                  ? error.message
+                  : "Payment verification failed."
               )
-            } finally {
+
               setLoading(false)
             }
-          },
-
-          prefill: {
-            name: form.fullName,
-            contact: form.mobile,
-          },
-
-          theme: {
-            color: "#f2b84b",
           },
 
           modal: {
@@ -211,6 +302,21 @@ export default function CheckoutPage() {
         checkout.open()
       }
 
+      if (existingScript) {
+        openCheckout()
+        return
+      }
+
+      const script =
+        document.createElement("script")
+
+      script.src =
+        "https://checkout.razorpay.com/v1/checkout.js"
+
+      script.async = true
+
+      script.onload = openCheckout
+
       script.onerror = () => {
         setLoading(false)
         alert("Unable to load Razorpay.")
@@ -219,7 +325,9 @@ export default function CheckoutPage() {
       document.body.appendChild(script)
     } catch (error) {
       console.error(error)
+
       setLoading(false)
+
       alert(
         error instanceof Error
           ? error.message
@@ -227,6 +335,39 @@ export default function CheckoutPage() {
       )
     }
   }
+
+  const paymentOptions = [
+    {
+      id: "upi" as const,
+      title: "UPI",
+      description: "Google Pay, PhonePe, Paytm & more",
+      icon: Smartphone,
+    },
+    {
+      id: "netbanking" as const,
+      title: "Net Banking",
+      description: "Pay through your bank",
+      icon: Landmark,
+    },
+    {
+      id: "card" as const,
+      title: "Debit / Credit Card",
+      description: "Visa, Mastercard & more",
+      icon: CreditCard,
+    },
+    {
+      id: "emi" as const,
+      title: "EMI",
+      description: "Available eligible EMI options",
+      icon: Banknote,
+    },
+    {
+      id: "online" as const,
+      title: "Online Payment",
+      description: "View all available Razorpay methods",
+      icon: WalletCards,
+    },
+  ]
 
   return (
     <main className="min-h-dvh bg-background pb-8">
@@ -307,7 +448,10 @@ export default function CheckoutPage() {
           <input
             value={form.fullName}
             onChange={(e) =>
-              updateField("fullName", e.target.value)
+              updateField(
+                "fullName",
+                e.target.value
+              )
             }
             placeholder="Full Name"
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
@@ -316,7 +460,10 @@ export default function CheckoutPage() {
           <input
             value={form.mobile}
             onChange={(e) =>
-              updateField("mobile", e.target.value)
+              updateField(
+                "mobile",
+                e.target.value
+              )
             }
             placeholder="Mobile Number"
             inputMode="numeric"
@@ -326,7 +473,10 @@ export default function CheckoutPage() {
           <textarea
             value={form.address}
             onChange={(e) =>
-              updateField("address", e.target.value)
+              updateField(
+                "address",
+                e.target.value
+              )
             }
             placeholder="Full Address"
             rows={3}
@@ -337,7 +487,10 @@ export default function CheckoutPage() {
             <input
               value={form.city}
               onChange={(e) =>
-                updateField("city", e.target.value)
+                updateField(
+                  "city",
+                  e.target.value
+                )
               }
               placeholder="City"
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
@@ -346,7 +499,10 @@ export default function CheckoutPage() {
             <input
               value={form.state}
               onChange={(e) =>
-                updateField("state", e.target.value)
+                updateField(
+                  "state",
+                  e.target.value
+                )
               }
               placeholder="State"
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
@@ -356,7 +512,10 @@ export default function CheckoutPage() {
           <input
             value={form.pincode}
             onChange={(e) =>
-              updateField("pincode", e.target.value)
+              updateField(
+                "pincode",
+                e.target.value
+              )
             }
             placeholder="PIN Code"
             inputMode="numeric"
@@ -366,37 +525,85 @@ export default function CheckoutPage() {
       </section>
 
       <section className="px-4 pt-6">
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center gap-3">
-            <CreditCard className="size-5 text-primary" />
+        <h2 className="text-lg font-semibold">
+          Select Payment Method
+        </h2>
 
-            <div>
-              <p className="text-sm font-semibold">
-                Online Payment
-              </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Select an option to open secure Razorpay Checkout.
+        </p>
 
-              <p className="text-xs text-muted-foreground">
-                Secure payment powered by Razorpay
-              </p>
-            </div>
-          </div>
+        <div className="mt-4 space-y-3">
+          {paymentOptions.map((option) => {
+            const Icon = option.icon
+            const selected =
+              selectedMethod === option.id
 
-          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="size-4" />
-            Secure checkout
-          </div>
+            return (
+              <button
+                key={option.id}
+                type="button"
+                disabled={loading}
+                onClick={() =>
+                  handlePayment(option.id)
+                }
+                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                  selected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                <div
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+                    selected
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary"
+                  }`}
+                >
+                  <Icon className="size-5" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {option.title}
+                  </p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {option.description}
+                  </p>
+                </div>
+
+                <span className="text-xs font-semibold text-primary">
+                  Pay
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="px-4 pt-6">
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+          <ShieldCheck className="size-5 shrink-0 text-primary" />
+
+          <span>
+            Secure payment powered by Razorpay.
+            Your payment details are handled by Razorpay.
+          </span>
         </div>
       </section>
 
       <section className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 p-4 backdrop-blur">
         <button
           type="button"
-          onClick={handlePayment}
+          onClick={() =>
+            handlePayment(selectedMethod)
+          }
           disabled={loading}
           className="w-full rounded-xl bg-primary py-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading
-            ? "Opening Payment..."
+            ? "Opening Razorpay..."
             : `Pay ${formatINR(cartTotal)}`}
         </button>
       </section>
