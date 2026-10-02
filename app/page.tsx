@@ -28,13 +28,11 @@ export default function HomePage() {
           pointerEvents: "auto",
         }}
       >
-
-        <div className="mx-auto max-w-7xl px-5 py-0.5">
+        <div className="mx-auto max-w-7xl px-5 py-0">
 
           <div className="flex items-center justify-between">
 
             {/* TIMEHUB */}
-
             <Link
               href="/"
               className="relative block"
@@ -43,23 +41,19 @@ export default function HomePage() {
                 pointerEvents: "auto",
               }}
             >
-
-              <div className="text-[21px] font-medium tracking-[0.18em]">
+              <div className="text-[19px] font-medium tracking-[0.18em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
 
-              <div className="mt-0 text-[8px] font-semibold tracking-[0.25em] text-white/80">
+              <div className="mt-0 text-[7px] font-semibold tracking-[0.25em] text-white/80">
                 Luxury Timepieces
               </div>
-
             </Link>
 
-
             {/* ADMIN */}
-
             <Link
               href="/admin"
-              className="relative flex h-[36px] min-w-[86px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-4 text-sm text-white"
+              className="relative flex h-[32px] min-w-[78px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#0b0a08] px-4 text-xs text-white"
               style={{
                 zIndex: 1000001,
                 pointerEvents: "auto",
@@ -71,19 +65,17 @@ export default function HomePage() {
 
           </div>
 
-
           {/* SEARCH */}
-
           <div className="mt-1">
 
-            <div className="flex h-[34px] items-center rounded-[12px] border border-white/15 bg-[#151310] px-3">
+            <div className="flex h-[28px] items-center rounded-[10px] border border-white/15 bg-[#151310] px-3">
 
-              <Search className="mr-3 size-[19px] shrink-0 text-white/50" />
+              <Search className="mr-2.5 size-[17px] shrink-0 text-white/50" />
 
               <input
                 type="text"
                 placeholder="Search watches"
-                className="w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/40"
+                className="w-full bg-transparent text-[12px] text-white outline-none placeholder:text-white/40"
               />
 
             </div>
@@ -91,13 +83,11 @@ export default function HomePage() {
           </div>
 
         </div>
-
       </header>
 
 
       {/* SPACE BELOW FIXED HEADER */}
-
-      <div className="h-[92px]" />
+      <div className="h-[72px]" />
 
 
       {/* ================= HERO ================= */}
@@ -107,7 +97,6 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
 
           <div className="relative h-[150px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
-
 
             {/* WATCH */}
 
@@ -175,7 +164,6 @@ export default function HomePage() {
       <section className="px-5 py-2">
 
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3">
-
 
           {/* AUTHENTIC */}
 
@@ -380,111 +368,4 @@ export default function HomePage() {
       <footer className="border-t border-white/10 px-5 py-10 text-center">
 
         <p className="text-lg tracking-[0.2em]">
-          TIME<span className="text-[#d8a84e]">HUB</span>
-        </p>
-
-        <p className="mt-2 text-xs text-white/50">
-          Luxury Timepieces
-        </p>
-
-        <p className="mt-5 text-[11px] text-white/30">
-          © {new Date().getFullYear()} TimeHub. All rights reserved.
-        </p>
-
-      </footer>
-
-
-      {/* ================= BOTTOM NAV ================= */}
-
-      <div
-        className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-[#0b0a08]/95 backdrop-blur"
-        style={{
-          zIndex: 99998,
-        }}
-      >
-
-        <div className="mx-auto grid max-w-md grid-cols-4">
-
-
-          {/* HOME */}
-
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 py-3 text-[#f2b84b]"
-          >
-
-            <Sparkles className="size-6" />
-
-            <span className="text-xs">
-              Home
-            </span>
-
-          </Link>
-
-
-          {/* CART */}
-
-          <Link
-            href="/cart"
-            className="relative flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <ShoppingBag className="size-6" />
-
-            {cartCount > 0 && (
-
-              <span className="absolute right-[28%] top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1 text-[10px] text-black">
-                {cartCount}
-              </span>
-
-            )}
-
-            <span className="text-xs">
-              Cart
-            </span>
-
-          </Link>
-
-
-          {/* HISTORY */}
-
-          <Link
-            href="/history"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="flex size-6 items-center justify-center rounded-full border-2 border-current">
-
-              <div className="h-2 w-0.5 bg-current" />
-
-            </div>
-
-            <span className="text-xs">
-              History
-            </span>
-
-          </Link>
-
-
-          {/* MY */}
-
-          <Link
-            href="/my"
-            className="flex flex-col items-center gap-1 py-3 text-white/50"
-          >
-
-            <div className="size-6 rounded-full border-2 border-current" />
-
-            <span className="text-xs">
-              My
-            </span>
-
-          </Link>
-
-        </div>
-
-      </div>
-
-    </main>
-  )
-}
+          TIME<span className="text-[#d8a84e]">HUB
