@@ -68,8 +68,7 @@ export default function CheckoutPage() {
       return {
         ...product,
         quantity: item.quantity,
-        total:
-          discountedPrice(product) * item.quantity,
+        total: discountedPrice(product) * item.quantity,
       }
     })
     .filter(Boolean) as Array<
@@ -110,22 +109,12 @@ export default function CheckoutPage() {
     }))
   }
 
-  function getRazorpayConfig(method: PaymentChoice) {
+  function getRazorpayConfig(
+    method: PaymentChoice
+  ) {
     if (method === "online") {
       return undefined
     }
-
-    const methodMap: Record<
-      Exclude<PaymentChoice, "online">,
-      string
-    > = {
-      upi: "upi",
-      netbanking: "netbanking",
-      card: "card",
-      emi: "emi",
-    }
-
-    const razorpayMethod = methodMap[method]
 
     return {
       display: {
@@ -133,15 +122,22 @@ export default function CheckoutPage() {
           selected: {
             name:
               method === "upi"
-                ? "Pay using UPI"
+                ? "UPI"
                 : method === "netbanking"
-                  ? "Pay using Net Banking"
+                  ? "Net Banking"
                   : method === "card"
-                    ? "Pay using Debit / Credit Card"
-                    : "Pay using EMI",
+                    ? "Debit / Credit Card"
+                    : "EMI",
             instruments: [
               {
-                method: razorpayMethod,
+                method:
+                  method === "upi"
+                    ? "upi"
+                    : method === "netbanking"
+                      ? "netbanking"
+                      : method === "card"
+                        ? "card"
+                        : "emi",
               },
             ],
           },
@@ -154,9 +150,7 @@ export default function CheckoutPage() {
     }
   }
 
-  async function handlePayment(
-    method: PaymentChoice = selectedMethod
-  ) {
+  async function handlePayment() {
     if (
       !form.fullName ||
       !form.mobile ||
@@ -171,7 +165,6 @@ export default function CheckoutPage() {
 
     try {
       setLoading(true)
-      setSelectedMethod(method)
 
       const response = await fetch(
         "/api/razorpay/order",
@@ -201,10 +194,6 @@ export default function CheckoutPage() {
         )
       }
 
-      const existingScript = document.querySelector(
-        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
-      )
-
       const openCheckout = () => {
         if (!window.Razorpay) {
           setLoading(false)
@@ -219,10 +208,11 @@ export default function CheckoutPage() {
 
           name: "AURELIA",
           description: "Luxury Timepiece",
-
           order_id: data.orderId,
 
-          config: getRazorpayConfig(method),
+          config: getRazorpayConfig(
+            selectedMethod
+          ),
 
           prefill: {
             name: form.fullName,
@@ -232,40 +222,44 @@ export default function CheckoutPage() {
           notes: {
             customer_name: form.fullName,
             mobile: form.mobile,
+            address: form.address,
             city: form.city,
             state: form.state,
             pincode: form.pincode,
-            payment_method: method,
+            payment_method: selectedMethod,
           },
 
           theme: {
             color: "#f2b84b",
           },
 
-          handler: async function (payment: {
-            razorpay_payment_id: string
-            razorpay_order_id: string
-            razorpay_signature: string
-          }) {
+          handler: async function (
+            payment: {
+              razorpay_payment_id: string
+              razorpay_order_id: string
+              razorpay_signature: string
+            }
+          ) {
             try {
-              const verifyResponse = await fetch(
-                "/api/razorpay/verify",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-                  },
-                  body: JSON.stringify({
-                    razorpay_payment_id:
-                      payment.razorpay_payment_id,
-                    razorpay_order_id:
-                      payment.razorpay_order_id,
-                    razorpay_signature:
-                      payment.razorpay_signature,
-                  }),
-                }
-              )
+              const verifyResponse =
+                await fetch(
+                  "/api/razorpay/verify",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type":
+                        "application/json",
+                    },
+                    body: JSON.stringify({
+                      razorpay_payment_id:
+                        payment.razorpay_payment_id,
+                      razorpay_order_id:
+                        payment.razorpay_order_id,
+                      razorpay_signature:
+                        payment.razorpay_signature,
+                    }),
+                  }
+                )
 
               const verifyData =
                 await verifyResponse.json()
@@ -301,6 +295,11 @@ export default function CheckoutPage() {
 
         checkout.open()
       }
+
+      const existingScript =
+        document.querySelector(
+          'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+        )
 
       if (existingScript) {
         openCheckout()
@@ -530,7 +529,7 @@ export default function CheckoutPage() {
         </h2>
 
         <p className="mt-1 text-xs text-muted-foreground">
-          Select an option to open secure Razorpay Checkout.
+          Select your payment method, then tap Pay.
         </p>
 
         <div className="mt-4 space-y-3">
@@ -545,7 +544,7 @@ export default function CheckoutPage() {
                 type="button"
                 disabled={loading}
                 onClick={() =>
-                  handlePayment(option.id)
+                  setSelectedMethod(option.id)
                 }
                 className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
                   selected
@@ -573,9 +572,17 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                <span className="text-xs font-semibold text-primary">
-                  Pay
-                </span>
+                <div
+                  className={`size-5 rounded-full border-2 ${
+                    selected
+                      ? "border-primary bg-primary"
+                      : "border-muted-foreground"
+                  }`}
+                >
+                  {selected && (
+                    <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
+                  )}
+                </div>
               </button>
             )
           })}
@@ -596,9 +603,7 @@ export default function CheckoutPage() {
       <section className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 p-4 backdrop-blur">
         <button
           type="button"
-          onClick={() =>
-            handlePayment(selectedMethod)
-          }
+          onClick={handlePayment}
           disabled={loading}
           className="w-full rounded-xl bg-primary py-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
         >
