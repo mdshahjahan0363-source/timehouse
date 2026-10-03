@@ -21,7 +21,6 @@ export async function GET() {
       .collection("products")
       .get()
 
-    // Firebase में कोई product नहीं है तो seed products डालें
     if (snapshot.empty) {
       const batch = adminDb.batch()
 
@@ -30,11 +29,7 @@ export async function GET() {
           .collection("products")
           .doc(product.id)
 
-        batch.set(ref, {
-          ...product,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
+        batch.set(ref, product)
       }
 
       await batch.commit()
@@ -49,19 +44,13 @@ export async function GET() {
       ...doc.data(),
     }))
 
-    return NextResponse.json({
-      products,
-    })
+    return NextResponse.json({ products })
   } catch (error) {
     console.error("GET products error:", error)
 
     return NextResponse.json(
-      {
-        error: "Failed to load products",
-      },
-      {
-        status: 500,
-      }
+      { error: "Failed to load products" },
+      { status: 500 }
     )
   }
 }
@@ -71,16 +60,10 @@ export async function POST(
   request: NextRequest
 ) {
   try {
-    const isAdmin = await requireAdmin()
-
-    if (!isAdmin) {
+    if (!(await requireAdmin())) {
       return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
+        { error: "Unauthorized" },
+        { status: 401 }
       )
     }
 
@@ -88,48 +71,45 @@ export async function POST(
 
     if (!data || typeof data !== "object") {
       return NextResponse.json(
-        {
-          error: "Invalid product data",
-        },
-        {
-          status: 400,
-        }
+        { error: "Invalid product data" },
+        { status: 400 }
+      )
+    }
+
+    const productData = JSON.parse(
+      JSON.stringify(data)
+    )
+
+    if (!productData.name) {
+      return NextResponse.json(
+        { error: "Product name is required" },
+        { status: 400 }
       )
     }
 
     const now = new Date().toISOString()
 
-    const productData = {
-      ...data,
+    const docRef = adminDb
+      .collection("products")
+      .doc()
+
+    await docRef.set({
+      ...productData,
       createdAt: now,
       updatedAt: now,
-    }
-
-    const docRef = await adminDb
-      .collection("products")
-      .add(productData)
-
-    const savedProduct = {
-      id: docRef.id,
-      ...productData,
-    }
-
-    console.log(
-      "PRODUCT SAVED:",
-      savedProduct
-    )
+    })
 
     return NextResponse.json(
-      savedProduct,
       {
-        status: 201,
-      }
+        id: docRef.id,
+        ...productData,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { status: 201 }
     )
   } catch (error) {
-    console.error(
-      "POST product error:",
-      error
-    )
+    console.error("POST product error:", error)
 
     return NextResponse.json(
       {
@@ -138,9 +118,7 @@ export async function POST(
             ? error.message
             : "Failed to create product",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }
@@ -150,16 +128,10 @@ export async function PUT(
   request: NextRequest
 ) {
   try {
-    const isAdmin = await requireAdmin()
-
-    if (!isAdmin) {
+    if (!(await requireAdmin())) {
       return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
+        { error: "Unauthorized" },
+        { status: 401 }
       )
     }
 
@@ -168,48 +140,25 @@ export async function PUT(
 
     if (!id) {
       return NextResponse.json(
-        {
-          error: "Product id is required",
-        },
-        {
-          status: 400,
-        }
+        { error: "Product id is required" },
+        { status: 400 }
       )
     }
 
-    const productRef = adminDb
+    await adminDb
       .collection("products")
       .doc(id)
-
-    const existing =
-      await productRef.get()
-
-    if (!existing.exists) {
-      return NextResponse.json(
-        {
-          error: "Product not found",
-        },
-        {
-          status: 404,
-        }
-      )
-    }
-
-    await productRef.update({
-      ...updates,
-      updatedAt:
-        new Date().toISOString(),
-    })
+      .update({
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      })
 
     return NextResponse.json({
       id,
       ...updates,
     })
   } catch (error) {
-    console.error(
-      "PUT product error:",
-      error
-    )
+    console.error("PUT product error:", error)
 
     return NextResponse.json(
       {
@@ -218,9 +167,7 @@ export async function PUT(
             ? error.message
             : "Failed to update product",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }
@@ -230,30 +177,19 @@ export async function DELETE(
   request: NextRequest
 ) {
   try {
-    const isAdmin = await requireAdmin()
-
-    if (!isAdmin) {
+    if (!(await requireAdmin())) {
       return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
+        { error: "Unauthorized" },
+        { status: 401 }
       )
     }
 
-    const { id } =
-      await request.json()
+    const { id } = await request.json()
 
     if (!id) {
       return NextResponse.json(
-        {
-          error: "Product id is required",
-        },
-        {
-          status: 400,
-        }
+        { error: "Product id is required" },
+        { status: 400 }
       )
     }
 
@@ -267,10 +203,7 @@ export async function DELETE(
       id,
     })
   } catch (error) {
-    console.error(
-      "DELETE product error:",
-      error
-    )
+    console.error("DELETE product error:", error)
 
     return NextResponse.json(
       {
@@ -279,9 +212,7 @@ export async function DELETE(
             ? error.message
             : "Failed to delete product",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }
