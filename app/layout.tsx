@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     'Discover premium luxury watches. Chronographs, divers, skeletons and classic dress watches. Secure checkout with Razorpay.',
   generator: 'v0.app',
   manifest: '/manifest.webmanifest',
+
+  verification: {
+    google: 'E76PXWjXunkI8elP7feLxqkcq9qbCsTJrGXqPnp70i0',
+  },
+
   icons: {
     icon: [
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -31,6 +36,7 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
