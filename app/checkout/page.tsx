@@ -172,6 +172,10 @@ export default function CheckoutPage() {
   ) {
     const orderId = `order_${Date.now()}`
 
+    const cleanMobile = form.mobile
+      .replace(/\D/g, "")
+      .slice(-10)
+
     const order = {
       id: orderId,
       createdAt: Date.now(),
@@ -188,7 +192,7 @@ export default function CheckoutPage() {
 
       address: {
         fullName: form.fullName,
-        mobile: form.mobile,
+        mobile: cleanMobile,
         address: form.address,
         city: form.city,
         state: form.state,
@@ -228,6 +232,13 @@ export default function CheckoutPage() {
       )
     }
 
+    // Save this customer's mobile number
+    // for Order History
+    localStorage.setItem(
+      "timehouse_customer_mobile",
+      cleanMobile
+    )
+
     // Save locally for Order History
     addOrder(order as any)
 
@@ -252,6 +263,17 @@ export default function CheckoutPage() {
       return
     }
 
+    const cleanMobile = form.mobile
+      .replace(/\D/g, "")
+      .slice(-10)
+
+    if (cleanMobile.length !== 10) {
+      alert(
+        "Please enter a valid 10 digit mobile number."
+      )
+      return
+    }
+
     if (cartTotal <= 0) {
       alert("Invalid order amount.")
       return
@@ -261,7 +283,6 @@ export default function CheckoutPage() {
       setLoading(true)
 
       /*
-       * STEP 1
        * Create Razorpay order
        */
       const response = await fetch(
@@ -293,9 +314,7 @@ export default function CheckoutPage() {
       }
 
       /*
-       * STEP 2
-       * Open Razorpay ONLY after
-       * customer presses Pay
+       * Open Razorpay
        */
       const openCheckout = () => {
         if (!window.Razorpay) {
@@ -331,7 +350,7 @@ export default function CheckoutPage() {
 
             prefill: {
               name: form.fullName,
-              contact: form.mobile,
+              contact: cleanMobile,
             },
 
             notes: {
@@ -339,7 +358,7 @@ export default function CheckoutPage() {
                 form.fullName,
 
               mobile:
-                form.mobile,
+                cleanMobile,
 
               address:
                 form.address,
@@ -370,8 +389,7 @@ export default function CheckoutPage() {
             ) {
               try {
                 /*
-                 * STEP 3
-                 * Verify Razorpay payment
+                 * Verify payment
                  */
                 const verifyResponse =
                   await fetch(
@@ -406,9 +424,7 @@ export default function CheckoutPage() {
                 }
 
                 /*
-                 * STEP 4
                  * Save successful order
-                 * to Firebase + local history
                  */
                 await saveOrder({
                   razorpay_payment_id:
@@ -419,7 +435,6 @@ export default function CheckoutPage() {
                 })
 
                 /*
-                 * STEP 5
                  * Go home after success
                  */
                 window.location.href =
@@ -566,7 +581,6 @@ export default function CheckoutPage() {
         </div>
       </header>
 
-      {/* ORDER SUMMARY */}
       <section className="px-4 pt-5">
         <h2 className="text-lg font-semibold">
           Order Summary
@@ -596,9 +610,7 @@ export default function CheckoutPage() {
                 </p>
 
                 <p className="mt-2 text-sm font-semibold">
-                  {formatINR(
-                    item.total
-                  )}
+                  {formatINR(item.total)}
                 </p>
               </div>
             </div>
@@ -616,7 +628,6 @@ export default function CheckoutPage() {
         </div>
       </section>
 
-      {/* DELIVERY */}
       <section className="px-4 pt-6">
         <h2 className="text-lg font-semibold">
           Delivery Details
@@ -645,6 +656,7 @@ export default function CheckoutPage() {
             }
             placeholder="Mobile Number"
             inputMode="numeric"
+            maxLength={10}
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
 
@@ -697,12 +709,12 @@ export default function CheckoutPage() {
             }
             placeholder="PIN Code"
             inputMode="numeric"
+            maxLength={6}
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
         </div>
       </section>
 
-      {/* PAYMENT METHODS */}
       <section className="px-4 pt-6">
         <h2 className="text-lg font-semibold">
           Select Payment Method
@@ -713,70 +725,65 @@ export default function CheckoutPage() {
         </p>
 
         <div className="mt-4 space-y-3">
-          {paymentOptions.map(
-            (option) => {
-              const Icon =
-                option.icon
+          {paymentOptions.map((option) => {
+            const Icon = option.icon
 
-              const selected =
-                selectedMethod ===
-                option.id
+            const selected =
+              selectedMethod === option.id
 
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  disabled={loading}
-                  onClick={() =>
-                    setSelectedMethod(
-                      option.id
-                    )
-                  }
-                  className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+            return (
+              <button
+                key={option.id}
+                type="button"
+                disabled={loading}
+                onClick={() =>
+                  setSelectedMethod(
+                    option.id
+                  )
+                }
+                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                  selected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card"
+                }`}
+              >
+                <div
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
                     selected
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-card"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary"
                   }`}
                 >
-                  <div
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
-                      selected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    <Icon className="size-5" />
-                  </div>
+                  <Icon className="size-5" />
+                </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
-                      {option.title}
-                    </p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {option.title}
+                  </p>
 
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {option.description}
-                    </p>
-                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {option.description}
+                  </p>
+                </div>
 
-                  <div
-                    className={`size-5 rounded-full border-2 ${
-                      selected
-                        ? "border-primary bg-primary"
-                        : "border-muted-foreground"
-                    }`}
-                  >
-                    {selected && (
-                      <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
-                    )}
-                  </div>
-                </button>
-              )
-            }
-          )}
+                <div
+                  className={`size-5 rounded-full border-2 ${
+                    selected
+                      ? "border-primary bg-primary"
+                      : "border-muted-foreground"
+                  }`}
+                >
+                  {selected && (
+                    <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
+                  )}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </section>
 
-      {/* SECURITY */}
       <section className="px-4 pt-6">
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
           <ShieldCheck className="size-5 shrink-0 text-primary" />
@@ -790,7 +797,6 @@ export default function CheckoutPage() {
         </div>
       </section>
 
-      {/* PAY BUTTON */}
       <section className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 p-4 backdrop-blur">
         <button
           type="button"
@@ -800,9 +806,7 @@ export default function CheckoutPage() {
         >
           {loading
             ? "Opening Razorpay..."
-            : `Pay ${formatINR(
-                cartTotal
-              )}`}
+            : `Pay ${formatINR(cartTotal)}`}
         </button>
       </section>
     </main>
