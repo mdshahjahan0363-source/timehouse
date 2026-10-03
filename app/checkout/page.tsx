@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   } = useStore()
 
   const [loading, setLoading] = useState(false)
+
   const [selectedMethod, setSelectedMethod] =
     useState<PaymentChoice>("online")
 
@@ -67,7 +68,7 @@ export default function CheckoutPage() {
   const items = cart
     .map((item) => {
       const product = products.find(
-        (product) => product.id === item.productId
+        (p) => p.id === item.productId
       )
 
       if (!product) return null
@@ -76,7 +77,8 @@ export default function CheckoutPage() {
         ...product,
         quantity: item.quantity,
         total:
-          discountedPrice(product) * item.quantity,
+          discountedPrice(product) *
+          item.quantity,
       }
     })
     .filter(Boolean) as Array<
@@ -133,7 +135,7 @@ export default function CheckoutPage() {
             ? "card"
             : "emi"
 
-    const methodName =
+    const name =
       method === "upi"
         ? "UPI"
         : method === "netbanking"
@@ -146,7 +148,7 @@ export default function CheckoutPage() {
       display: {
         blocks: {
           selected: {
-            name: methodName,
+            name,
             instruments: [
               {
                 method: razorpayMethod,
@@ -162,6 +164,79 @@ export default function CheckoutPage() {
     }
   }
 
+  async function saveOrder(
+    payment: {
+      razorpay_payment_id: string
+      razorpay_order_id: string
+    }
+  ) {
+    const orderId = `order_${Date.now()}`
+
+    const order = {
+      id: orderId,
+      createdAt: Date.now(),
+
+      items: items.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        image: item.image,
+        price: discountedPrice(item),
+        quantity: item.quantity,
+      })),
+
+      amount: cartTotal,
+
+      address: {
+        fullName: form.fullName,
+        mobile: form.mobile,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode,
+      },
+
+      paymentMethod: selectedMethod,
+
+      paymentStatus: "paid",
+
+      orderStatus: "Pending",
+
+      razorpayOrderId:
+        payment.razorpay_order_id,
+
+      razorpayPaymentId:
+        payment.razorpay_payment_id,
+    }
+
+    const saveResponse = await fetch(
+      "/api/orders",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      }
+    )
+
+    const saveData = await saveResponse.json()
+
+    if (!saveResponse.ok) {
+      throw new Error(
+        saveData?.error ||
+          "Order could not be saved"
+      )
+    }
+
+    // Save locally for Order History
+    addOrder(order as any)
+
+    // Clear cart after successful order
+    clearCart()
+
+    return order
+  }
+
   async function handlePayment() {
     if (
       !form.fullName.trim() ||
@@ -171,19 +246,24 @@ export default function CheckoutPage() {
       !form.state.trim() ||
       !form.pincode.trim()
     ) {
-      alert("Please fill all delivery details.")
+      alert(
+        "Please fill all delivery details."
+      )
       return
     }
 
-    if (!selectedMethod) {
-      alert("Please select a payment method.")
+    if (cartTotal <= 0) {
+      alert("Invalid order amount.")
       return
     }
 
     try {
       setLoading(true)
 
-      // 1. Create Razorpay order
+      /*
+       * STEP 1
+       * Create Razorpay order
+       */
       const response = await fetch(
         "/api/razorpay/order",
         {
@@ -212,21 +292,36 @@ export default function CheckoutPage() {
         )
       }
 
+      /*
+       * STEP 2
+       * Open Razorpay ONLY after
+       * customer presses Pay
+       */
       const openCheckout = () => {
         if (!window.Razorpay) {
           setLoading(false)
-          alert("Razorpay could not be loaded.")
+
+          alert(
+            "Razorpay could not be loaded."
+          )
+
           return
         }
 
         const checkout =
           new window.Razorpay({
             key: data.keyId,
+
             amount: data.amount,
-            currency: data.currency || "INR",
+
+            currency:
+              data.currency || "INR",
 
             name: "AURELIA",
-            description: "Luxury Timepiece",
+
+            description:
+              "Luxury Timepiece",
+
             order_id: data.orderId,
 
             config:
@@ -240,12 +335,24 @@ export default function CheckoutPage() {
             },
 
             notes: {
-              customer_name: form.fullName,
-              mobile: form.mobile,
-              address: form.address,
-              city: form.city,
-              state: form.state,
-              pincode: form.pincode,
+              customer_name:
+                form.fullName,
+
+              mobile:
+                form.mobile,
+
+              address:
+                form.address,
+
+              city:
+                form.city,
+
+              state:
+                form.state,
+
+              pincode:
+                form.pincode,
+
               payment_method:
                 selectedMethod,
             },
@@ -262,7 +369,10 @@ export default function CheckoutPage() {
               }
             ) {
               try {
-                // 2. Verify Razorpay payment
+                /*
+                 * STEP 3
+                 * Verify Razorpay payment
+                 */
                 const verifyResponse =
                   await fetch(
                     "/api/razorpay/verify",
@@ -275,8 +385,10 @@ export default function CheckoutPage() {
                       body: JSON.stringify({
                         razorpay_payment_id:
                           payment.razorpay_payment_id,
+
                         razorpay_order_id:
                           payment.razorpay_order_id,
+
                         razorpay_signature:
                           payment.razorpay_signature,
                       }),
@@ -293,90 +405,28 @@ export default function CheckoutPage() {
                   )
                 }
 
-                // 3. Create order object
-                const order = {
-                  id: payment.razorpay_order_id,
-
-                  createdAt: Date.now(),
-
-                  items: items.map(
-                    (item) => ({
-                      productId: item.id,
-                      name: item.name,
-                      image: item.image,
-                      price:
-                        discountedPrice(item),
-                      quantity:
-                        item.quantity,
-                    })
-                  ),
-
-                  amount: cartTotal,
-
-                  address: {
-                    fullName:
-                      form.fullName,
-                    mobile:
-                      form.mobile,
-                    address:
-                      form.address,
-                    city: form.city,
-                    state: form.state,
-                    pincode:
-                      form.pincode,
-                  },
-
-                  paymentMethod:
-                    selectedMethod,
-
-                  paymentStatus:
-                    "paid" as const,
-
-                  orderStatus:
-                    "Pending" as const,
-
-                  razorpayOrderId:
-                    payment.razorpay_order_id,
-
-                  razorpayPaymentId:
+                /*
+                 * STEP 4
+                 * Save successful order
+                 * to Firebase + local history
+                 */
+                await saveOrder({
+                  razorpay_payment_id:
                     payment.razorpay_payment_id,
-                }
 
-                // 4. Save order in Firebase
-                const orderResponse =
-                  await fetch("/api/orders", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type":
-                        "application/json",
-                    },
-                    body: JSON.stringify(
-                      order
-                    ),
-                  })
+                  razorpay_order_id:
+                    payment.razorpay_order_id,
+                })
 
-                const orderData =
-                  await orderResponse.json()
-
-                if (!orderResponse.ok) {
-                  throw new Error(
-                    orderData?.error ||
-                      "Unable to save order"
-                  )
-                }
-
-                // 5. Save locally also
-                addOrder(order)
-
-                // 6. Clear cart
-                clearCart()
-
-                // 7. Go to order history
+                /*
+                 * STEP 5
+                 * Go home after success
+                 */
                 window.location.href =
-                  "/history"
+                  "/?payment=success"
               } catch (error) {
                 console.error(
-                  "Payment/order error:",
+                  "Payment success handling error:",
                   error
                 )
 
@@ -391,16 +441,19 @@ export default function CheckoutPage() {
             },
 
             modal: {
-              ondismiss: function () {
-                setLoading(false)
-              },
+              ondismiss:
+                function () {
+                  setLoading(false)
+                },
             },
           })
 
         checkout.open()
       }
 
-      // Load Razorpay only once
+      /*
+       * Load Razorpay script only once
+       */
       const existingScript =
         document.querySelector(
           'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
@@ -412,25 +465,35 @@ export default function CheckoutPage() {
       }
 
       const script =
-        document.createElement("script")
+        document.createElement(
+          "script"
+        )
 
       script.src =
         "https://checkout.razorpay.com/v1/checkout.js"
 
       script.async = true
 
-      script.onload = openCheckout
+      script.onload =
+        openCheckout
 
-      script.onerror = () => {
-        setLoading(false)
-        alert(
-          "Unable to load Razorpay."
-        )
-      }
+      script.onerror =
+        () => {
+          setLoading(false)
 
-      document.body.appendChild(script)
+          alert(
+            "Unable to load Razorpay."
+          )
+        }
+
+      document.body.appendChild(
+        script
+      )
     } catch (error) {
-      console.error(error)
+      console.error(
+        "Payment error:",
+        error
+      )
 
       setLoading(false)
 
@@ -503,6 +566,7 @@ export default function CheckoutPage() {
         </div>
       </header>
 
+      {/* ORDER SUMMARY */}
       <section className="px-4 pt-5">
         <h2 className="text-lg font-semibold">
           Order Summary
@@ -532,7 +596,9 @@ export default function CheckoutPage() {
                 </p>
 
                 <p className="mt-2 text-sm font-semibold">
-                  {formatINR(item.total)}
+                  {formatINR(
+                    item.total
+                  )}
                 </p>
               </div>
             </div>
@@ -550,6 +616,7 @@ export default function CheckoutPage() {
         </div>
       </section>
 
+      {/* DELIVERY */}
       <section className="px-4 pt-6">
         <h2 className="text-lg font-semibold">
           Delivery Details
@@ -635,85 +702,95 @@ export default function CheckoutPage() {
         </div>
       </section>
 
+      {/* PAYMENT METHODS */}
       <section className="px-4 pt-6">
         <h2 className="text-lg font-semibold">
           Select Payment Method
         </h2>
 
         <p className="mt-1 text-xs text-muted-foreground">
-          Select your payment method, then tap Pay.
+          Select payment method first, then tap Pay.
         </p>
 
         <div className="mt-4 space-y-3">
-          {paymentOptions.map((option) => {
-            const Icon = option.icon
-            const selected =
-              selectedMethod === option.id
+          {paymentOptions.map(
+            (option) => {
+              const Icon =
+                option.icon
 
-            return (
-              <button
-                key={option.id}
-                type="button"
-                disabled={loading}
-                onClick={() =>
-                  setSelectedMethod(
-                    option.id
-                  )
-                }
-                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
-                  selected
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-card"
-                } disabled:cursor-not-allowed disabled:opacity-60`}
-              >
-                <div
-                  className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+              const selected =
+                selectedMethod ===
+                option.id
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={loading}
+                  onClick={() =>
+                    setSelectedMethod(
+                      option.id
+                    )
+                  }
+                  className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
                     selected
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card"
                   }`}
                 >
-                  <Icon className="size-5" />
-                </div>
+                  <div
+                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+                      selected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary"
+                    }`}
+                  >
+                    <Icon className="size-5" />
+                  </div>
 
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">
-                    {option.title}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">
+                      {option.title}
+                    </p>
 
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {option.description}
-                  </p>
-                </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {option.description}
+                    </p>
+                  </div>
 
-                <div
-                  className={`size-5 rounded-full border-2 ${
-                    selected
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground"
-                  }`}
-                >
-                  {selected && (
-                    <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
-                  )}
-                </div>
-              </button>
-            )
-          })}
+                  <div
+                    className={`size-5 rounded-full border-2 ${
+                      selected
+                        ? "border-primary bg-primary"
+                        : "border-muted-foreground"
+                    }`}
+                  >
+                    {selected && (
+                      <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
+                    )}
+                  </div>
+                </button>
+              )
+            }
+          )}
         </div>
       </section>
 
+      {/* SECURITY */}
       <section className="px-4 pt-6">
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
           <ShieldCheck className="size-5 shrink-0 text-primary" />
 
           <span>
-            Secure payment powered by Razorpay.
-            Your payment details are handled by Razorpay.
+            Secure payment powered by
+            Razorpay. Your payment
+            details are handled by
+            Razorpay.
           </span>
         </div>
       </section>
 
+      {/* PAY BUTTON */}
       <section className="sticky bottom-0 z-30 mt-8 border-t border-border bg-background/95 p-4 backdrop-blur">
         <button
           type="button"
@@ -723,7 +800,9 @@ export default function CheckoutPage() {
         >
           {loading
             ? "Opening Razorpay..."
-            : `Pay ${formatINR(cartTotal)}`}
+            : `Pay ${formatINR(
+                cartTotal
+              )}`}
         </button>
       </section>
     </main>
