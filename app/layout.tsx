@@ -19,7 +19,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'AURELIA — Luxury Timepieces',
+  title: "TimeHub — Luxury Timepieces",
   description:
     'Discover premium luxury watches. Chronographs, divers, skeletons and classic dress watches. Secure checkout with Razorpay.',
   generator: 'v0.app',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AURELIA',
+    title: 'TimeHub',
   },
 }
 
