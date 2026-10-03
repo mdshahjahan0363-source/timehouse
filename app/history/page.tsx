@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -14,6 +15,33 @@ import { formatINR, formatDate } from "@/lib/format"
 
 export default function HistoryPage() {
   const { orders, ready } = useStore()
+
+  const [customerMobile, setCustomerMobile] =
+    useState("")
+
+  useEffect(() => {
+    const mobile = localStorage.getItem(
+      "timehouse_customer_mobile"
+    )
+
+    if (mobile) {
+      setCustomerMobile(
+        mobile.replace(/\D/g, "").slice(-10)
+      )
+    }
+  }, [])
+
+  const myOrders = orders.filter((order) => {
+    const orderMobile =
+      order.address?.mobile
+        ?.replace(/\D/g, "")
+        .slice(-10)
+
+    return (
+      customerMobile &&
+      orderMobile === customerMobile
+    )
+  })
 
   if (!ready) {
     return (
@@ -51,7 +79,7 @@ export default function HistoryPage() {
 
       {/* CONTENT */}
       <section className="mx-auto max-w-md px-4 py-5">
-        {orders.length === 0 ? (
+        {myOrders.length === 0 ? (
           <div className="flex min-h-[55vh] flex-col items-center justify-center text-center">
             <div className="flex size-16 items-center justify-center rounded-full border border-white/10 bg-[#151310]">
               <Package className="size-7 text-white/40" />
@@ -74,9 +102,12 @@ export default function HistoryPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {orders
+            {myOrders
               .slice()
-              .reverse()
+              .sort(
+                (a, b) =>
+                  b.createdAt - a.createdAt
+              )
               .map((order) => (
                 <div
                   key={order.id}
@@ -118,7 +149,8 @@ export default function HistoryPage() {
 
                         <p className="shrink-0 text-sm font-medium">
                           {formatINR(
-                            item.price * item.quantity,
+                            item.price *
+                              item.quantity
                           )}
                         </p>
                       </div>
@@ -133,14 +165,18 @@ export default function HistoryPage() {
                       </span>
 
                       <span className="text-base font-semibold">
-                        {formatINR(order.amount)}
+                        {formatINR(
+                          order.amount
+                        )}
                       </span>
                     </div>
 
                     <div className="mt-3 flex items-center gap-2 text-xs text-white/40">
                       <Clock3 className="size-3.5" />
 
-                      {formatDate(order.createdAt)}
+                      {formatDate(
+                        order.createdAt
+                      )}
                     </div>
 
                     <div className="mt-2 text-xs text-white/40">
