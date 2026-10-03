@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -18,6 +19,45 @@ export default function MyPage() {
     orders,
     ready,
   } = useStore()
+
+  const [customerMobile, setCustomerMobile] =
+    useState("")
+
+  useEffect(() => {
+    const savedMobile =
+      localStorage.getItem(
+        "timehouse_customer_mobile"
+      )
+
+    if (savedMobile) {
+      setCustomerMobile(
+        savedMobile
+          .replace(/\D/g, "")
+          .slice(-10)
+      )
+      return
+    }
+
+    if (profile?.phone) {
+      setCustomerMobile(
+        profile.phone
+          .replace(/\D/g, "")
+          .slice(-10)
+      )
+    }
+  }, [profile?.phone])
+
+  const myOrders = orders.filter((order) => {
+    const orderMobile =
+      order.address?.mobile
+        ?.replace(/\D/g, "")
+        .slice(-10)
+
+    return (
+      customerMobile &&
+      orderMobile === customerMobile
+    )
+  })
 
   if (!ready) {
     return (
@@ -106,8 +146,8 @@ export default function MyPage() {
             </p>
 
             <p className="mt-1 text-xs text-white/40">
-              {orders.length}{" "}
-              {orders.length === 1
+              {myOrders.length}{" "}
+              {myOrders.length === 1
                 ? "order"
                 : "orders"}
             </p>
