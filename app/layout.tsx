@@ -20,7 +20,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "TimeHub — Luxury Timepieces",
+  title: 'TimeHub — Luxury Timepieces',
   description:
     'Discover premium luxury watches. Chronographs, divers, skeletons and classic dress watches. Secure checkout with Razorpay.',
   generator: 'v0.app',
@@ -32,8 +32,16 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      {
+        url: '/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        url: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
     ],
     apple: '/apple-icon.png',
   },
@@ -61,12 +69,41 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${playfair.variable} antialiased`}
+      >
+
+        {/* PWA SERVICE WORKER */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function () {
+                  navigator.serviceWorker.register("/sw.js")
+                    .then(function (registration) {
+                      console.log("TimeHub Service Worker registered:", registration.scope)
+                    })
+                    .catch(function (error) {
+                      console.error("TimeHub Service Worker registration failed:", error)
+                    })
+                })
+              }
+            `,
+          }}
+        />
+
         <StoreProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </StoreProvider>
+
         <PwaInstall />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+
+        {process.env.NODE_ENV === 'production' && (
+          <Analytics />
+        )}
+
       </body>
     </html>
   )
