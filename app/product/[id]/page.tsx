@@ -14,12 +14,18 @@ type ProductPageProps = {
   }>
 }
 
+const BUY_NOW_KEY = "timehouse.buyNow"
+
 export default function ProductPage({
   params,
 }: ProductPageProps) {
   const { id } = use(params)
 
-  const { products, addToCart, ready } = useStore()
+  const {
+    products,
+    addToCart,
+    ready,
+  } = useStore()
 
   const [added, setAdded] = useState(false)
   const [selectedImage, setSelectedImage] = useState("")
@@ -34,7 +40,9 @@ export default function ProductPage({
     )
   }
 
-  const product = products.find((item) => item.id === id)
+  const product = products.find(
+    (item) => item.id === id
+  )
 
   if (!product) {
     return (
@@ -63,12 +71,21 @@ export default function ProductPage({
   ].filter(Boolean)
 
   const currentImage =
-    selectedImage || images[0] || "/placeholder.svg"
+    selectedImage ||
+    images[0] ||
+    "/placeholder.svg"
 
   const price = discountedPrice(product)
 
+  // --------------------------------
+  // ADD TO CART
+  // --------------------------------
+
   function handleAddToCart() {
+    if (product.stock <= 0) return
+
     addToCart(product.id, 1)
+
     setAdded(true)
 
     window.setTimeout(() => {
@@ -76,8 +93,32 @@ export default function ProductPage({
     }, 2000)
   }
 
+  // --------------------------------
+  // BUY NOW
+  // IMPORTANT:
+  // This does NOT add product to cart.
+  // It stores only temporary Buy Now
+  // product and opens checkout.
+  // --------------------------------
+
   function handleBuyNow() {
-    addToCart(product.id, 1)
+    if (product.stock <= 0) return
+
+    try {
+      sessionStorage.setItem(
+        BUY_NOW_KEY,
+        JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+        })
+      )
+    } catch (error) {
+      console.error(
+        "Buy Now storage error:",
+        error
+      )
+    }
+
     window.location.href = "/checkout"
   }
 
@@ -128,7 +169,9 @@ export default function ProductPage({
               <button
                 key={`${image}-${index}`}
                 type="button"
-                onClick={() => setSelectedImage(image)}
+                onClick={() =>
+                  setSelectedImage(image)
+                }
                 className={
                   `size-16 shrink-0 overflow-hidden rounded-xl border ` +
                   (
