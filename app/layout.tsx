@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   description:
     'Discover premium luxury watches. Chronographs, divers, skeletons and classic dress watches. Secure checkout with Razorpay.',
   generator: 'v0.app',
-  manifest: '/manifest.webmanifest',
+  manifest: '/manifest.json',
 
   verification: {
     google: 'E76PXWjXunkI8elP7feLxqkcq9qbCsTJrGXqPnp70i0',
