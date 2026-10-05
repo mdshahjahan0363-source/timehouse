@@ -8,6 +8,7 @@ import {
   MapPin,
   ShoppingBag,
   ChevronRight,
+  Headphones,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
@@ -216,6 +217,32 @@ export default function MyPage() {
           )}
 
         </div>
+
+        {/* CUSTOMER SUPPORT */}
+        <Link
+          href="/support"
+          className="mt-4 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+        >
+
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <Headphones className="size-5" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+
+            <p className="text-sm font-medium">
+              Customer Support
+            </p>
+
+            <p className="mt-1 text-xs text-white/40">
+              WhatsApp, Email & Social Media
+            </p>
+
+          </div>
+
+          <ChevronRight className="size-5 text-white/30" />
+
+        </Link>
 
         {/* STORE BUTTON */}
         <Link
