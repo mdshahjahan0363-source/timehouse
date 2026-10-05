@@ -6,8 +6,7 @@ import {
   MessageCircle,
   Mail,
   Phone,
-  Instagram,
-  Facebook,
+  ExternalLink,
 } from "lucide-react"
 
 export default function SupportPage() {
@@ -31,7 +30,7 @@ export default function SupportPage() {
             </h1>
 
             <p className="text-[11px] text-white/40">
-              How can we help you?
+              We are here to help you
             </p>
           </div>
 
@@ -40,13 +39,14 @@ export default function SupportPage() {
 
       <section className="mx-auto max-w-md px-4 py-5">
 
+        {/* TITLE */}
         <div className="mb-5">
           <h2 className="text-2xl font-semibold">
-            Contact Us
+            How can we help?
           </h2>
 
-          <p className="mt-2 text-sm text-white/40">
-            Choose an option below to get in touch with us.
+          <p className="mt-1 text-sm text-white/40">
+            Choose an option to contact TimeHub support.
           </p>
         </div>
 
@@ -55,100 +55,111 @@ export default function SupportPage() {
           href="https://wa.me/919241331531"
           target="_blank"
           rel="noopener noreferrer"
-          className="mb-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+          className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#25D366]">
-            <MessageCircle className="size-6" />
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <MessageCircle className="size-5" />
           </div>
 
-          <div className="flex-1">
-            <p className="font-medium">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
               WhatsApp
             </p>
+
             <p className="mt-1 text-xs text-white/40">
               Chat with us on WhatsApp
             </p>
           </div>
+
+          <ExternalLink className="size-5 text-white/30" />
         </a>
 
         {/* EMAIL */}
         <a
           href="mailto:support@timehub.com"
-          className="mb-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+          className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
-            <Mail className="size-6" />
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <Mail className="size-5" />
           </div>
 
-          <div className="flex-1">
-            <p className="font-medium">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
               Email
             </p>
+
             <p className="mt-1 text-xs text-white/40">
               Send us an email
             </p>
           </div>
+
+          <ExternalLink className="size-5 text-white/30" />
         </a>
 
         {/* CONTACT */}
         <a
           href="tel:+919241331531"
-          className="mb-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+          className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
-            <Phone className="size-6" />
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <Phone className="size-5" />
           </div>
 
-          <div className="flex-1">
-            <p className="font-medium">
-              Contact Us
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
+              Contact
             </p>
+
             <p className="mt-1 text-xs text-white/40">
-              Call our support team
+              Call our customer support
             </p>
           </div>
+
+          <ExternalLink className="size-5 text-white/30" />
         </a>
 
         {/* INSTAGRAM */}
         <a
-          href="https://instagram.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mb-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+          href="#"
+          className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
-            <Instagram className="size-6" />
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <span className="text-lg font-bold">◎</span>
           </div>
 
-          <div className="flex-1">
-            <p className="font-medium">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
               Instagram
             </p>
+
             <p className="mt-1 text-xs text-white/40">
               Follow us on Instagram
             </p>
           </div>
+
+          <ExternalLink className="size-5 text-white/30" />
         </a>
 
         {/* FACEBOOK */}
         <a
-          href="https://facebook.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
+          href="#"
+          className="mt-3 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151310] p-4"
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
-            <Facebook className="size-6" />
+          <div className="flex size-11 items-center justify-center rounded-xl bg-[#f2b84b]/10 text-[#f2b84b]">
+            <span className="text-lg font-bold">f</span>
           </div>
 
-          <div className="flex-1">
-            <p className="font-medium">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
               Facebook
             </p>
+
             <p className="mt-1 text-xs text-white/40">
               Follow us on Facebook
             </p>
           </div>
+
+          <ExternalLink className="size-5 text-white/30" />
         </a>
 
       </section>
