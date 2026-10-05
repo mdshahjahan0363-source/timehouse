@@ -93,6 +93,7 @@ export default function HomePage() {
               className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <ShoppingBag className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 Cart
               </span>
@@ -110,6 +111,7 @@ export default function HomePage() {
               className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <History className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 Orders / History
               </span>
@@ -121,30 +123,31 @@ export default function HomePage() {
               className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <User className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 My Account
               </span>
             </Link>
 
-            {/* ADMIN */}
             <Link
               href="/admin"
               onClick={() => setMenuOpen(false)}
               className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <Settings className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 Admin
               </span>
             </Link>
 
-            {/* CUSTOMER SUPPORT */}
             <Link
               href="/support"
               onClick={() => setMenuOpen(false)}
               className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <Headphones className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 Customer Support
               </span>
@@ -168,12 +171,14 @@ export default function HomePage() {
 
       {/* FIXED HEADER */}
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-5 py-4">
+
+        <div className="mx-auto max-w-7xl px-5 py-2.5">
 
           {/* BRAND + MENU */}
           <div className="flex items-center justify-between">
 
             <Link href="/" className="block">
+
               <div className="text-[25px] font-medium tracking-[0.20em]">
                 TIME<span className="text-[#d8a84e]">HUB</span>
               </div>
@@ -181,9 +186,10 @@ export default function HomePage() {
               <div className="mt-0.5 text-[9px] tracking-[0.28em] text-white/45">
                 Luxury Timepieces
               </div>
+
             </Link>
 
-            {/* MENU BUTTON - SAME PLACE AS OLD ADMIN */}
+            {/* MENU BUTTON */}
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -199,9 +205,10 @@ export default function HomePage() {
 
           </div>
 
-          {/* FIXED SEARCH */}
-          <div className="mt-3">
-            <div className="flex h-[52px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
+          {/* SEARCH */}
+          <div className="mt-2">
+
+            <div className="flex h-[46px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
 
               <Search className="mr-3 size-5 text-white/45" />
 
@@ -212,13 +219,14 @@ export default function HomePage() {
               />
 
             </div>
+
           </div>
 
         </div>
       </header>
 
       {/* SPACE FOR FIXED HEADER */}
-      <div className="h-[158px]" />
+      <div className="h-[125px]" />
 
       {/* HERO / NEW COLLECTION */}
       <section className="border-b border-white/10 px-5 py-3">
@@ -227,22 +235,24 @@ export default function HomePage() {
 
           <div className="relative h-[160px] overflow-hidden rounded-[20px] border border-white/15 bg-[#17130f] px-5 py-3">
 
-            {/* WATCH DECORATION */}
             <div className="pointer-events-none absolute -right-7 top-0 opacity-20">
+
               <div className="relative h-36 w-24">
 
                 <div className="absolute left-9 top-0 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
 
                 <div className="absolute left-0 top-7 h-22 w-22 rounded-full border-[5px] border-[#9b6b18]">
+
                   <div className="absolute left-1/2 top-1/2 h-6 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9b6b18]" />
+
                 </div>
 
                 <div className="absolute bottom-0 left-9 h-9 w-9 rounded-[12px] border-[5px] border-[#9b6b18]" />
 
               </div>
+
             </div>
 
-            {/* HERO CONTENT */}
             <div className="relative z-10 max-w-[70%]">
 
               <p className="text-[6px] uppercase tracking-[0.32em] text-[#d8a84e]">
@@ -282,6 +292,7 @@ export default function HomePage() {
             <ShieldCheck className="size-6 shrink-0 text-[#d8a84e]" />
 
             <div>
+
               <div className="text-sm font-medium">
                 Authentic
               </div>
@@ -289,6 +300,7 @@ export default function HomePage() {
               <div className="mt-0.5 text-[10px] text-white/45">
                 100% genuine
               </div>
+
             </div>
 
           </div>
@@ -298,6 +310,7 @@ export default function HomePage() {
             <Truck className="size-6 shrink-0 text-[#d8a84e]" />
 
             <div>
+
               <div className="text-sm font-medium">
                 Fast Delivery
               </div>
@@ -305,6 +318,7 @@ export default function HomePage() {
               <div className="mt-0.5 text-[10px] text-white/45">
                 Across India
               </div>
+
             </div>
 
           </div>
@@ -357,7 +371,8 @@ export default function HomePage() {
 
             {products.map((product) => {
 
-              const salePrice = discountedPrice(product)
+              const salePrice =
+                discountedPrice(product)
 
               return (
                 <Link
@@ -384,9 +399,11 @@ export default function HomePage() {
 
                     {product.stock <= 0 && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+
                         <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs">
                           Out of stock
                         </span>
+
                       </div>
                     )}
 
