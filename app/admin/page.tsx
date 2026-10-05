@@ -15,6 +15,9 @@ import {
   Loader2,
   X,
   Headphones,
+  Settings,
+  Upload,
+  ImageIcon,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
@@ -38,7 +41,11 @@ import {
 import { useToast } from "@/lib/toast"
 import { cn } from "@/lib/utils"
 
-type Tab = "products" | "orders" | "support"
+type Tab =
+  | "products"
+  | "orders"
+  | "support"
+  | "settings"
 
 type SupportOption = {
   id: string
@@ -49,6 +56,12 @@ type SupportOption = {
   enabled: boolean
   createdAt?: number
   updatedAt?: number
+}
+
+type SiteSettings = {
+  siteName: string
+  tagline: string
+  logoUrl: string
 }
 
 export default function AdminPage() {
@@ -324,7 +337,8 @@ function AdminDashboard({
         },
       )
 
-      const result = await response.json()
+      const result =
+        await response.json()
 
       if (!response.ok) {
         throw new Error(
@@ -365,7 +379,8 @@ function AdminDashboard({
         },
       )
 
-      const result = await response.json()
+      const result =
+        await response.json()
 
       if (!response.ok) {
         throw new Error(
@@ -408,7 +423,8 @@ function AdminDashboard({
         },
       )
 
-      const result = await response.json()
+      const result =
+        await response.json()
 
       if (!response.ok) {
         throw new Error(
@@ -500,12 +516,16 @@ function AdminDashboard({
           <div className="grid grid-cols-3 gap-2 px-4 pb-3">
             <Stat
               label="Products"
-              value={String(products.length)}
+              value={String(
+                products.length,
+              )}
             />
 
             <Stat
               label="Orders"
-              value={String(orders.length)}
+              value={String(
+                orders.length,
+              )}
             />
 
             <Stat
@@ -543,6 +563,16 @@ function AdminDashboard({
             >
               <Headphones className="size-4" />
               Support
+            </TabButton>
+
+            <TabButton
+              active={tab === "settings"}
+              onClick={() =>
+                setTab("settings")
+              }
+            >
+              <Settings className="size-4" />
+              Settings
             </TabButton>
           </div>
         </div>
@@ -582,7 +612,7 @@ function AdminDashboard({
               )
             }}
           />
-        ) : (
+        ) : tab === "support" ? (
           <SupportSection
             support={support}
             loading={supportLoading}
@@ -597,6 +627,8 @@ function AdminDashboard({
             }
             onToggle={toggleSupport}
           />
+        ) : (
+          <SettingsSection />
         )}
       </div>
 
@@ -812,585 +844,4 @@ function ProductsSection({
               key={product.id}
               className="flex gap-3 rounded-2xl border border-border bg-card p-3"
             >
-              <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-secondary/40">
-                <Image
-                  src={
-                    product.image ||
-                    "/placeholder.svg"
-                  }
-                  alt={product.name}
-                  fill
-                  sizes="64px"
-                  className="object-cover"
-                />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <h3 className="line-clamp-1 text-sm font-medium">
-                  {product.name}
-                </h3>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">
-                    {formatINR(
-                      discountedPrice(
-                        product,
-                      ),
-                    )}
-                  </span>
-
-                  {product.discount > 0 && (
-                    <span className="text-[10px] text-primary">
-                      -{product.discount}%
-                    </span>
-                  )}
-                </div>
-
-                <StockBadge
-                  stock={product.stock}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onEdit(product)
-                  }
-                  className="flex size-8 items-center justify-center rounded-lg border border-border"
-                  aria-label="Edit product"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    onDelete(product)
-                  }
-                  className="flex size-8 items-center justify-center rounded-lg border border-border text-destructive"
-                  aria-label="Delete product"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-function OrdersSection({
-  orders,
-  onStatusChange,
-}: {
-  orders: Array<{
-    id: string
-    createdAt: number
-    items: Array<{
-      productId: string
-      name: string
-      price: number
-      quantity: number
-    }>
-    amount: number
-    address: {
-      fullName: string
-      mobile: string
-      address: string
-      city: string
-      state: string
-      pincode: string
-    }
-    paymentStatus:
-      | "paid"
-      | "pending"
-      | "failed"
-    orderStatus: OrderStatus
-  }>
-  onStatusChange: (
-    id: string,
-    status: OrderStatus,
-  ) => void
-}) {
-  return (
-    <section className="px-4 pt-4">
-      {orders.length === 0 ? (
-        <EmptyState
-          icon={
-            <ShoppingBag className="size-7" />
-          }
-          title="No orders yet"
-          description="Customer orders will appear here."
-        />
-      ) : (
-        <ul className="space-y-3">
-          {orders.map((order) => (
-            <li
-              key={order.id}
-              className="rounded-2xl border border-border bg-card p-4"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-mono text-xs">
-                    #{order.id}
-                  </p>
-
-                  <p className="text-[11px] text-muted-foreground">
-                    {formatDate(
-                      order.createdAt,
-                    )}
-                  </p>
-                </div>
-
-                <PaymentBadge
-                  status={
-                    order.paymentStatus
-                  }
-                />
-              </div>
-
-              <div className="mt-3 space-y-2 border-t border-border pt-3">
-                {order.items.map(
-                  (item) => (
-                    <div
-                      key={item.productId}
-                      className="flex justify-between text-xs"
-                    >
-                      <span className="line-clamp-1 text-muted-foreground">
-                        {item.name} ×{" "}
-                        {item.quantity}
-                      </span>
-
-                      <span>
-                        {formatINR(
-                          item.price *
-                            item.quantity,
-                        )}
-                      </span>
-                    </div>
-                  ),
-                )}
-              </div>
-
-              <div className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-                <p className="font-medium text-foreground">
-                  {order.address.fullName}
-                  {" · +91 "}
-                  {order.address.mobile}
-                </p>
-
-                <p>
-                  {order.address.address},{" "}
-                  {order.address.city},{" "}
-                  {order.address.state} -{" "}
-                  {order.address.pincode}
-                </p>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                <span className="font-semibold">
-                  {formatINR(
-                    order.amount,
-                  )}
-                </span>
-
-                <OrderStatusBadge
-                  status={
-                    order.orderStatus
-                  }
-                />
-              </div>
-
-              <div className="mt-3">
-                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Update Order Status
-                </p>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {ORDER_STATUSES.map(
-                    (status) => (
-                      <button
-                        key={status}
-                        type="button"
-                        onClick={() =>
-                          onStatusChange(
-                            order.id,
-                            status,
-                          )
-                        }
-                        className={cn(
-                          "rounded-full border px-3 py-1 text-[11px] font-medium",
-                          order.orderStatus ===
-                            status
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border text-muted-foreground",
-                        )}
-                      >
-                        {status}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-function SupportSection({
-  support,
-  loading,
-  onAdd,
-  onEdit,
-  onDelete,
-  onToggle,
-}: {
-  support: SupportOption[]
-  loading: boolean
-  onAdd: () => void
-  onEdit: (item: SupportOption) => void
-  onDelete: (item: SupportOption) => void
-  onToggle: (item: SupportOption) => void
-}) {
-  return (
-    <section className="px-4 pt-4">
-      <button
-        type="button"
-        onClick={onAdd}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-semibold text-primary"
-      >
-        <Plus className="size-4" />
-        Add Support Option
-      </button>
-
-      {loading ? (
-        <Spinner label="Loading support..." />
-      ) : support.length === 0 ? (
-        <EmptyState
-          icon={
-            <Headphones className="size-7" />
-          }
-          title="No support options"
-          description="Add WhatsApp, Email, Phone or social media support."
-        />
-      ) : (
-        <ul className="space-y-3">
-          {support.map((item) => (
-            <li
-              key={item.id}
-              className="rounded-2xl border border-border bg-card p-4"
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Headphones className="size-5" />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-semibold">
-                      {item.title}
-                    </h3>
-
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] uppercase text-muted-foreground">
-                      {item.type}
-                    </span>
-                  </div>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.description ||
-                      "No description"}
-                  </p>
-
-                  <p className="mt-2 break-all text-[10px] text-muted-foreground">
-                    {item.link}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onToggle(item)
-                  }
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-[11px] font-medium",
-                    item.enabled
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border text-muted-foreground",
-                  )}
-                >
-                  {item.enabled
-                    ? "Enabled"
-                    : "Disabled"}
-                </button>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onEdit(item)
-                    }
-                    className="flex size-8 items-center justify-center rounded-lg border border-border"
-                    aria-label="Edit support"
-                  >
-                    <Pencil className="size-3.5" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onDelete(item)
-                    }
-                    className="flex size-8 items-center justify-center rounded-lg border border-border text-destructive"
-                    aria-label="Delete support"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-function SupportFormModal({
-  initial,
-  onClose,
-  onSubmit,
-}: {
-  initial?: SupportOption
-  onClose: () => void
-  onSubmit: (
-    data: Omit<
-      SupportOption,
-      "id" | "createdAt" | "updatedAt"
-    >,
-  ) => void
-}) {
-  const [title, setTitle] = useState(
-    initial?.title || "",
-  )
-
-  const [description, setDescription] =
-    useState(
-      initial?.description || "",
-    )
-
-  const [type, setType] = useState(
-    initial?.type || "contact",
-  )
-
-  const [link, setLink] = useState(
-    initial?.link || "",
-  )
-
-  const [enabled, setEnabled] =
-    useState(
-      initial?.enabled !== false,
-    )
-
-  function submit(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault()
-
-    if (!title.trim()) {
-      return
-    }
-
-    if (!link.trim()) {
-      return
-    }
-
-    onSubmit({
-      title: title.trim(),
-      description: description.trim(),
-      type: type.trim() || "contact",
-      link: link.trim(),
-      enabled,
-    })
-  }
-
-  return (
-    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl border-t border-border bg-popover p-4">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="font-serif text-lg">
-              {initial
-                ? "Edit Support"
-                : "Add Support"}
-            </h2>
-
-            <p className="mt-1 text-xs text-muted-foreground">
-              Manage customer support contact.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full border border-border"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-
-        <form
-          onSubmit={submit}
-          className="space-y-4"
-        >
-          <Field
-            label="Title"
-            htmlFor="support-title"
-          >
-            <TextInput
-              id="support-title"
-              value={title}
-              onChange={(event) =>
-                setTitle(event.target.value)
-              }
-              placeholder="WhatsApp"
-            />
-          </Field>
-
-          <Field
-            label="Description"
-            htmlFor="support-description"
-          >
-            <TextInput
-              id="support-description"
-              value={description}
-              onChange={(event) =>
-                setDescription(
-                  event.target.value,
-                )
-              }
-              placeholder="Chat with us on WhatsApp"
-            />
-          </Field>
-
-          <Field
-            label="Type"
-            htmlFor="support-type"
-          >
-            <TextInput
-              id="support-type"
-              value={type}
-              onChange={(event) =>
-                setType(event.target.value)
-              }
-              placeholder="whatsapp / email / phone / instagram / facebook"
-            />
-          </Field>
-
-          <Field
-            label="Link"
-            htmlFor="support-link"
-          >
-            <TextInput
-              id="support-link"
-              value={link}
-              onChange={(event) =>
-                setLink(event.target.value)
-              }
-              placeholder="https://wa.me/..."
-            />
-          </Field>
-
-          <label className="flex items-center gap-3 rounded-xl border border-border p-3">
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={(event) =>
-                setEnabled(
-                  event.target.checked,
-                )
-              }
-              className="size-4"
-            />
-
-            <span className="text-sm">
-              Show on customer support page
-            </span>
-          </label>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
-            >
-              {initial
-                ? "Save Changes"
-                : "Add Support"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-function Stat({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-
-      <p className="truncate text-sm font-semibold">
-        {value}
-      </p>
-    </div>
-  )
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex min-w-[33.33%] flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-medium",
-        active
-          ? "border-primary text-foreground"
-          : "border-transparent text-muted-foreground",
-      )}
-    >
-      {children}
-    </button>
-  )
-}
+              <div className
