@@ -33,17 +33,17 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-192.png',
+        url: '/api/site-icon',
         sizes: '192x192',
         type: 'image/png',
       },
       {
-        url: '/icon-512.png',
+        url: '/api/site-icon',
         sizes: '512x512',
         type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/api/site-icon',
   },
 
   appleWebApp: {
@@ -72,8 +72,6 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} antialiased`}
       >
-
-        {/* PWA SERVICE WORKER */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -103,7 +101,6 @@ export default function RootLayout({
         {process.env.NODE_ENV === 'production' && (
           <Analytics />
         )}
-
       </body>
     </html>
   )
