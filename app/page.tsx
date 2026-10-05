@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -8,6 +9,13 @@ import {
   Truck,
   Sparkles,
   Search,
+  Menu,
+  X,
+  Home,
+  History,
+  User,
+  Headphones,
+  Settings,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
@@ -15,19 +23,154 @@ import { discountedPrice } from "@/lib/types"
 
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
-
-  function openAdmin() {
-    window.location.href = "/admin"
-  }
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
+
+      {/* SIDE MENU OVERLAY */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
+      {/* SIDE MENU */}
+      <aside
+        className={`fixed left-0 top-0 z-[400] h-full w-[290px] border-r border-white/10 bg-[#11100e] shadow-2xl transition-transform duration-300 ${
+          menuOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-full flex-col">
+
+          {/* MENU HEADER */}
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
+
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+            >
+              <div className="text-[22px] font-medium tracking-[0.20em]">
+                TIME<span className="text-[#d8a84e]">HUB</span>
+              </div>
+
+              <div className="mt-0.5 text-[8px] tracking-[0.28em] text-white/45">
+                Luxury Timepieces
+              </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              className="flex size-10 items-center justify-center rounded-full border border-white/15"
+              aria-label="Close menu"
+            >
+              <X className="size-5" />
+            </button>
+
+          </div>
+
+          {/* MENU ITEMS */}
+          <nav className="flex-1 px-4 py-5">
+
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <Home className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                Home
+              </span>
+            </Link>
+
+            <Link
+              href="/cart"
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <ShoppingBag className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                Cart
+              </span>
+
+              {cartCount > 0 && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f2b84b] px-1.5 text-[10px] text-black">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/history"
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <History className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                Orders / History
+              </span>
+            </Link>
+
+            <Link
+              href="/my"
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <User className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                My Account
+              </span>
+            </Link>
+
+            {/* ADMIN */}
+            <Link
+              href="/admin"
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <Settings className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                Admin
+              </span>
+            </Link>
+
+            {/* CUSTOMER SUPPORT */}
+            <Link
+              href="/support"
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
+            >
+              <Headphones className="size-5 text-[#d8a84e]" />
+              <span className="text-sm">
+                Customer Support
+              </span>
+            </Link>
+
+          </nav>
+
+          {/* MENU FOOTER */}
+          <div className="border-t border-white/10 px-5 py-5">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/30">
+              TIMEHUB
+            </p>
+
+            <p className="mt-1 text-xs text-white/30">
+              Luxury Timepieces
+            </p>
+          </div>
+
+        </div>
+      </aside>
 
       {/* FIXED HEADER */}
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-white/10 bg-[#0b0a08]/95 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-5 py-4">
 
-          {/* BRAND + ADMIN */}
+          {/* BRAND + MENU */}
           <div className="flex items-center justify-between">
 
             <Link href="/" className="block">
@@ -40,18 +183,18 @@ export default function HomePage() {
               </div>
             </Link>
 
-            {/* ADMIN BUTTON */}
+            {/* MENU BUTTON - SAME PLACE AS OLD ADMIN */}
             <button
               type="button"
-              onClick={openAdmin}
-              aria-label="Open Admin"
-              className="relative z-[999999] flex h-[38px] min-w-[82px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-[#0b0a08] px-5 py-2 text-sm text-white/80"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              className="relative z-[200] flex size-[42px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-[#0b0a08] text-white/80"
               style={{
                 pointerEvents: "auto",
                 touchAction: "manipulation",
               }}
             >
-              Admin
+              <Menu className="size-6" />
             </button>
 
           </div>
