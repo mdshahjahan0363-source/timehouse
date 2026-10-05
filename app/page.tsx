@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -16,14 +16,58 @@ import {
   User,
   Headphones,
   Settings,
+  Download,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
 import { discountedPrice } from "@/lib/types"
+import { installPwa } from "@/components/pwa-install"
 
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [installAvailable, setInstallAvailable] = useState(false)
+
+  useEffect(() => {
+    const handleInstallAvailable = () => {
+      setInstallAvailable(true)
+    }
+
+    const handleInstallCompleted = () => {
+      setInstallAvailable(false)
+    }
+
+    window.addEventListener(
+      "pwa-install-available",
+      handleInstallAvailable
+    )
+
+    window.addEventListener(
+      "pwa-install-completed",
+      handleInstallCompleted
+    )
+
+    return () => {
+      window.removeEventListener(
+        "pwa-install-available",
+        handleInstallAvailable
+      )
+
+      window.removeEventListener(
+        "pwa-install-completed",
+        handleInstallCompleted
+      )
+    }
+  }, [])
+
+  const handleInstall = () => {
+    const started = installPwa()
+
+    if (started) {
+      setInstallAvailable(false)
+      setMenuOpen(false)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
@@ -76,17 +120,20 @@ export default function HomePage() {
           {/* MENU ITEMS */}
           <nav className="flex-1 px-4 py-5">
 
+            {/* HOME */}
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-white/80 transition hover:bg-white/5"
             >
               <Home className="size-5 text-[#d8a84e]" />
+
               <span className="text-sm">
                 Home
               </span>
             </Link>
 
+            {/* CART */}
             <Link
               href="/cart"
               onClick={() => setMenuOpen(false)}
@@ -105,6 +152,7 @@ export default function HomePage() {
               )}
             </Link>
 
+            {/* HISTORY */}
             <Link
               href="/history"
               onClick={() => setMenuOpen(false)}
@@ -117,6 +165,7 @@ export default function HomePage() {
               </span>
             </Link>
 
+            {/* MY ACCOUNT */}
             <Link
               href="/my"
               onClick={() => setMenuOpen(false)}
@@ -129,6 +178,7 @@ export default function HomePage() {
               </span>
             </Link>
 
+            {/* ADMIN */}
             <Link
               href="/admin"
               onClick={() => setMenuOpen(false)}
@@ -141,6 +191,7 @@ export default function HomePage() {
               </span>
             </Link>
 
+            {/* CUSTOMER SUPPORT */}
             <Link
               href="/support"
               onClick={() => setMenuOpen(false)}
@@ -153,10 +204,26 @@ export default function HomePage() {
               </span>
             </Link>
 
+            {/* INSTALL APP */}
+            {installAvailable && (
+              <button
+                type="button"
+                onClick={handleInstall}
+                className="mt-1 flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left text-white/80 transition hover:bg-white/5"
+              >
+                <Download className="size-5 text-[#d8a84e]" />
+
+                <span className="text-sm">
+                  Install App
+                </span>
+              </button>
+            )}
+
           </nav>
 
           {/* MENU FOOTER */}
           <div className="border-t border-white/10 px-5 py-5">
+
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/30">
               TIMEHUB
             </p>
@@ -164,6 +231,7 @@ export default function HomePage() {
             <p className="mt-1 text-xs text-white/30">
               Luxury Timepieces
             </p>
+
           </div>
 
         </div>
