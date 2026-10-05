@@ -14,6 +14,7 @@ import {
   Lock,
   Loader2,
   X,
+  Headphones,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
@@ -37,7 +38,18 @@ import {
 import { useToast } from "@/lib/toast"
 import { cn } from "@/lib/utils"
 
-type Tab = "products" | "orders"
+type Tab = "products" | "orders" | "support"
+
+type SupportOption = {
+  id: string
+  title: string
+  description: string
+  type: string
+  link: string
+  enabled: boolean
+  createdAt?: number
+  updatedAt?: number
+}
 
 export default function AdminPage() {
   const [checking, setChecking] = useState(true)
@@ -231,6 +243,21 @@ function AdminDashboard({
   const [confirmDelete, setConfirmDelete] =
     useState<Product | null>(null)
 
+  const [support, setSupport] =
+    useState<SupportOption[]>([])
+
+  const [supportLoading, setSupportLoading] =
+    useState(false)
+
+  const [supportEditing, setSupportEditing] =
+    useState<SupportOption | null>(null)
+
+  const [supportCreating, setSupportCreating] =
+    useState(false)
+
+  const [supportDelete, setSupportDelete] =
+    useState<SupportOption | null>(null)
+
   const revenue = orders
     .filter(
       (order) =>
@@ -241,6 +268,180 @@ function AdminDashboard({
         total + order.amount,
       0,
     )
+
+  useEffect(() => {
+    if (tab !== "support") return
+
+    loadSupport()
+  }, [tab])
+
+  async function loadSupport() {
+    setSupportLoading(true)
+
+    try {
+      const response = await fetch(
+        "/api/admin/support",
+        {
+          cache: "no-store",
+        },
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Failed to load support",
+        )
+      }
+
+      setSupport(data.support || [])
+    } catch {
+      toast(
+        "Failed to load support options",
+        "error",
+      )
+    } finally {
+      setSupportLoading(false)
+    }
+  }
+
+  async function addSupport(
+    data: Omit<
+      SupportOption,
+      "id" | "createdAt" | "updatedAt"
+    >,
+  ) {
+    try {
+      const response = await fetch(
+        "/api/admin/support",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      )
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Failed to add support",
+        )
+      }
+
+      toast(
+        "Support option added",
+        "success",
+      )
+
+      setSupportCreating(false)
+      await loadSupport()
+    } catch (error) {
+      toast(
+        error instanceof Error
+          ? error.message
+          : "Failed to add support",
+        "error",
+      )
+    }
+  }
+
+  async function updateSupport(
+    data: SupportOption,
+  ) {
+    try {
+      const response = await fetch(
+        "/api/admin/support",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      )
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Failed to update support",
+        )
+      }
+
+      toast(
+        "Support option updated",
+        "success",
+      )
+
+      setSupportEditing(null)
+      await loadSupport()
+    } catch (error) {
+      toast(
+        error instanceof Error
+          ? error.message
+          : "Failed to update support",
+        "error",
+      )
+    }
+  }
+
+  async function deleteSupport(
+    item: SupportOption,
+  ) {
+    try {
+      const response = await fetch(
+        "/api/admin/support",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: item.id,
+          }),
+        },
+      )
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Failed to delete support",
+        )
+      }
+
+      toast(
+        "Support option deleted",
+        "info",
+      )
+
+      setSupportDelete(null)
+      await loadSupport()
+    } catch (error) {
+      toast(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete support",
+        "error",
+      )
+    }
+  }
+
+  async function toggleSupport(
+    item: SupportOption,
+  ) {
+    await updateSupport({
+      ...item,
+      enabled: !item.enabled,
+    })
+  }
 
   async function logout() {
     await fetch(
@@ -256,6 +457,10 @@ function AdminDashboard({
 
   const showForm =
     creating || editing !== null
+
+  const showSupportForm =
+    supportCreating ||
+    supportEditing !== null
 
   return (
     <main className="min-h-dvh bg-background pb-10">
@@ -309,7 +514,7 @@ function AdminDashboard({
             />
           </div>
 
-          <div className="flex border-t border-border">
+          <div className="flex overflow-x-auto border-t border-border">
             <TabButton
               active={tab === "products"}
               onClick={() =>
@@ -328,6 +533,16 @@ function AdminDashboard({
             >
               <ShoppingBag className="size-4" />
               Orders
+            </TabButton>
+
+            <TabButton
+              active={tab === "support"}
+              onClick={() =>
+                setTab("support")
+              }
+            >
+              <Headphones className="size-4" />
+              Support
             </TabButton>
           </div>
         </div>
@@ -349,7 +564,7 @@ function AdminDashboard({
               setConfirmDelete(product)
             }
           />
-        ) : (
+        ) : tab === "orders" ? (
           <OrdersSection
             orders={orders}
             onStatusChange={(
@@ -366,6 +581,21 @@ function AdminDashboard({
                 "success",
               )
             }}
+          />
+        ) : (
+          <SupportSection
+            support={support}
+            loading={supportLoading}
+            onAdd={() =>
+              setSupportCreating(true)
+            }
+            onEdit={(item) =>
+              setSupportEditing(item)
+            }
+            onDelete={(item) =>
+              setSupportDelete(item)
+            }
+            onToggle={toggleSupport}
           />
         )}
       </div>
@@ -469,6 +699,70 @@ function AdminDashboard({
 
                   setConfirmDelete(null)
                 }}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSupportForm && (
+        <SupportFormModal
+          initial={
+            supportEditing ?? undefined
+          }
+          onClose={() => {
+            setSupportCreating(false)
+            setSupportEditing(null)
+          }}
+          onSubmit={(data) => {
+            if (supportEditing) {
+              updateSupport({
+                ...data,
+                id: supportEditing.id,
+              })
+            } else {
+              addSupport(data)
+            }
+          }}
+        />
+      )}
+
+      {supportDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-popover p-5 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+              <Trash2 className="size-6" />
+            </div>
+
+            <h3 className="mt-3 font-serif text-lg">
+              Delete support option?
+            </h3>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              {supportDelete.title} will be permanently removed.
+            </p>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setSupportDelete(null)
+                }
+                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-semibold"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  deleteSupport(
+                    supportDelete,
+                  )
+                }
                 className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
               >
                 Delete
@@ -749,6 +1043,313 @@ function OrdersSection({
   )
 }
 
+function SupportSection({
+  support,
+  loading,
+  onAdd,
+  onEdit,
+  onDelete,
+  onToggle,
+}: {
+  support: SupportOption[]
+  loading: boolean
+  onAdd: () => void
+  onEdit: (item: SupportOption) => void
+  onDelete: (item: SupportOption) => void
+  onToggle: (item: SupportOption) => void
+}) {
+  return (
+    <section className="px-4 pt-4">
+      <button
+        type="button"
+        onClick={onAdd}
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-semibold text-primary"
+      >
+        <Plus className="size-4" />
+        Add Support Option
+      </button>
+
+      {loading ? (
+        <Spinner label="Loading support..." />
+      ) : support.length === 0 ? (
+        <EmptyState
+          icon={
+            <Headphones className="size-7" />
+          }
+          title="No support options"
+          description="Add WhatsApp, Email, Phone or social media support."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {support.map((item) => (
+            <li
+              key={item.id}
+              className="rounded-2xl border border-border bg-card p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Headphones className="size-5" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="truncate text-sm font-semibold">
+                      {item.title}
+                    </h3>
+
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] uppercase text-muted-foreground">
+                      {item.type}
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {item.description ||
+                      "No description"}
+                  </p>
+
+                  <p className="mt-2 break-all text-[10px] text-muted-foreground">
+                    {item.link}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onToggle(item)
+                  }
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-[11px] font-medium",
+                    item.enabled
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {item.enabled
+                    ? "Enabled"
+                    : "Disabled"}
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onEdit(item)
+                    }
+                    className="flex size-8 items-center justify-center rounded-lg border border-border"
+                    aria-label="Edit support"
+                  >
+                    <Pencil className="size-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onDelete(item)
+                    }
+                    className="flex size-8 items-center justify-center rounded-lg border border-border text-destructive"
+                    aria-label="Delete support"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+function SupportFormModal({
+  initial,
+  onClose,
+  onSubmit,
+}: {
+  initial?: SupportOption
+  onClose: () => void
+  onSubmit: (
+    data: Omit<
+      SupportOption,
+      "id" | "createdAt" | "updatedAt"
+    >,
+  ) => void
+}) {
+  const [title, setTitle] = useState(
+    initial?.title || "",
+  )
+
+  const [description, setDescription] =
+    useState(
+      initial?.description || "",
+    )
+
+  const [type, setType] = useState(
+    initial?.type || "contact",
+  )
+
+  const [link, setLink] = useState(
+    initial?.link || "",
+  )
+
+  const [enabled, setEnabled] =
+    useState(
+      initial?.enabled !== false,
+    )
+
+  function submit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault()
+
+    if (!title.trim()) {
+      return
+    }
+
+    if (!link.trim()) {
+      return
+    }
+
+    onSubmit({
+      title: title.trim(),
+      description: description.trim(),
+      type: type.trim() || "contact",
+      link: link.trim(),
+      enabled,
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-black/70 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl border-t border-border bg-popover p-4">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-lg">
+              {initial
+                ? "Edit Support"
+                : "Add Support"}
+            </h2>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Manage customer support contact.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex size-8 items-center justify-center rounded-full border border-border"
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <form
+          onSubmit={submit}
+          className="space-y-4"
+        >
+          <Field
+            label="Title"
+            htmlFor="support-title"
+          >
+            <TextInput
+              id="support-title"
+              value={title}
+              onChange={(event) =>
+                setTitle(event.target.value)
+              }
+              placeholder="WhatsApp"
+            />
+          </Field>
+
+          <Field
+            label="Description"
+            htmlFor="support-description"
+          >
+            <TextInput
+              id="support-description"
+              value={description}
+              onChange={(event) =>
+                setDescription(
+                  event.target.value,
+                )
+              }
+              placeholder="Chat with us on WhatsApp"
+            />
+          </Field>
+
+          <Field
+            label="Type"
+            htmlFor="support-type"
+          >
+            <TextInput
+              id="support-type"
+              value={type}
+              onChange={(event) =>
+                setType(event.target.value)
+              }
+              placeholder="whatsapp / email / phone / instagram / facebook"
+            />
+          </Field>
+
+          <Field
+            label="Link"
+            htmlFor="support-link"
+          >
+            <TextInput
+              id="support-link"
+              value={link}
+              onChange={(event) =>
+                setLink(event.target.value)
+              }
+              placeholder="https://wa.me/..."
+            />
+          </Field>
+
+          <label className="flex items-center gap-3 rounded-xl border border-border p-3">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(event) =>
+                setEnabled(
+                  event.target.checked,
+                )
+              }
+              className="size-4"
+            />
+
+            <span className="text-sm">
+              Show on customer support page
+            </span>
+          </label>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
+            >
+              {initial
+                ? "Save Changes"
+                : "Add Support"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function Stat({
   label,
   value,
@@ -783,7 +1384,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-medium",
+        "flex min-w-[33.33%] flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-medium",
         active
           ? "border-primary text-foreground"
           : "border-transparent text-muted-foreground",
