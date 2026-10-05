@@ -66,7 +66,11 @@ type Tab =
   | "orders"
   | "support"
   | "settings"
-
+type SiteSettings = {
+  siteName: string
+  tagline: string
+  logoUrl: string
+}
 type SupportOption = {
   id: string
   title: string
