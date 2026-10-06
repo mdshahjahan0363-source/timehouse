@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const amount = Number(body.amount)
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json(
         { error: "Invalid amount" },
         { status: 400 }
@@ -17,8 +17,19 @@ export async function POST(request: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET
 
     if (!keyId || !keySecret) {
+      console.error(
+        "Razorpay keys are missing:",
+        {
+          keyId: Boolean(keyId),
+          keySecret: Boolean(keySecret),
+        }
+      )
+
       return NextResponse.json(
-        { error: "Razorpay server keys are not configured" },
+        {
+          error:
+            "Razorpay server keys are not configured. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel Environment Variables.",
+        },
         { status: 500 }
       )
     }
@@ -40,11 +51,22 @@ export async function POST(request: Request) {
       currency: order.currency,
       keyId,
     })
-  } catch (error) {
-    console.error("Razorpay order error:", error)
+  } catch (error: any) {
+    console.error(
+      "Razorpay order error:",
+      error
+    )
+
+    const errorMessage =
+      error?.error?.description ||
+      error?.error?.reason ||
+      error?.message ||
+      "Unable to create Razorpay order"
 
     return NextResponse.json(
-      { error: "Unable to create Razorpay order" },
+      {
+        error: errorMessage,
+      },
       { status: 500 }
     )
   }
