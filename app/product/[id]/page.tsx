@@ -14,6 +14,8 @@ type ProductPageProps = {
   }>
 }
 
+const BUY_NOW_KEY = "timehouse.buyNow"
+
 export default function ProductPage({
   params,
 }: ProductPageProps) {
@@ -91,9 +93,28 @@ export default function ProductPage({
     if (product.stock <= 0) return
 
     /*
-     * Buy Now product is passed directly
-     * through the checkout URL.
+     * Save the CURRENT selected product temporarily.
+     *
+     * sessionStorage is used instead of localStorage so
+     * an old Buy Now product cannot interfere with normal
+     * cart checkout.
      */
+    try {
+      sessionStorage.setItem(
+        BUY_NOW_KEY,
+        JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+          product,
+        })
+      )
+    } catch (error) {
+      console.error(
+        "Unable to save Buy Now product:",
+        error
+      )
+    }
+
     window.location.href =
       `/checkout?buyNow=${encodeURIComponent(
         product.id
