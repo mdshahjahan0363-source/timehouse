@@ -14,8 +14,6 @@ type ProductPageProps = {
   }>
 }
 
-const BUY_NOW_KEY = "timehouse.buyNow"
-
 export default function ProductPage({
   params,
 }: ProductPageProps) {
@@ -77,10 +75,6 @@ export default function ProductPage({
 
   const price = discountedPrice(product)
 
-  // --------------------------------
-  // ADD TO CART
-  // --------------------------------
-
   function handleAddToCart() {
     if (product.stock <= 0) return
 
@@ -93,33 +87,17 @@ export default function ProductPage({
     }, 2000)
   }
 
-  // --------------------------------
-  // BUY NOW
-  // IMPORTANT:
-  // This does NOT add product to cart.
-  // It stores only temporary Buy Now
-  // product and opens checkout.
-  // --------------------------------
-
   function handleBuyNow() {
     if (product.stock <= 0) return
 
-    try {
-      sessionStorage.setItem(
-        BUY_NOW_KEY,
-        JSON.stringify({
-          productId: product.id,
-          quantity: 1,
-        })
-      )
-    } catch (error) {
-      console.error(
-        "Buy Now storage error:",
-        error
-      )
-    }
-
-    window.location.href = "/checkout"
+    /*
+     * Buy Now product is passed directly
+     * through the checkout URL.
+     */
+    window.location.href =
+      `/checkout?buyNow=${encodeURIComponent(
+        product.id
+      )}&quantity=1`
   }
 
   return (
@@ -135,7 +113,7 @@ export default function ProductPage({
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-muted-foreground">
-              {product.brand || "AURELIA"}
+              {product.brand || "TimeHub"}
             </p>
 
             <h1 className="truncate text-sm font-semibold">
@@ -194,7 +172,7 @@ export default function ProductPage({
 
       <section className="px-4 pt-6">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
-          {product.brand || "AURELIA"}
+          {product.brand || "TimeHub"}
         </p>
 
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">
