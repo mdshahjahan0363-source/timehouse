@@ -1,8 +1,8 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-
 import {
   ArrowLeft,
   CreditCard,
@@ -24,22 +24,22 @@ type PaymentChoice =
   | "card"
   | "emi"
 
-type BuyNowData = {
-  productId: string
-  quantity: number
-}
-
 declare global {
   interface Window {
-    Razorpay: new (
-      options: any
-    ) => {
+    Razorpay: new (options: any) => {
       open: () => void
     }
   }
 }
 
-const BUY_NOW_KEY = "timehouse.buyNow"
+type CheckoutItem = {
+  id: string
+  name: string
+  image: string
+  quantity: number
+  total: number
+  [key: string]: any
+}
 
 export default function CheckoutPage() {
   const {
@@ -52,8 +52,11 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false)
   const [checkoutReady, setCheckoutReady] = useState(false)
-  const [buyNowData, setBuyNowData] =
-    useState<BuyNowData | null>(null)
+
+  // Buy Now is read ONLY from the current URL.
+  // No localStorage/sessionStorage fallback.
+  const [buyNowId, setBuyNowId] = useState<string | null>(null)
+  const [buyNowQuantity, setBuyNowQuantity] = useState(1)
 
   const [selectedMethod, setSelectedMethod] =
     useState<PaymentChoice>("online")
@@ -67,123 +70,22 @@ export default function CheckoutPage() {
     pincode: "",
   })
 
-  /*
-   * BUY NOW DATA
-   *
-   * Priority:
-   * 1. URL
-   * 2. localStorage
-   * 3. old sessionStorage
-   */
   useEffect(() => {
     if (!ready) return
 
-    try {
-      const params = new URLSearchParams(
-        window.location.search
-      )
+    const params = new URLSearchParams(window.location.search)
+    const productId = params.get("buyNow")
+    const rawQuantity = Number(params.get("quantity") || "1")
 
-      const urlProductId =
-        params.get("buyNow")
-
-      const urlQuantity = Math.max(
-        1,
-        Number(
-          params.get("quantity") || "1"
-        )
-      )
-
-      /*
-       * BUY NOW FROM URL
-       */
-      if (urlProductId) {
-        const data: BuyNowData = {
-          productId: urlProductId,
-          quantity: urlQuantity,
-        }
-
-        localStorage.setItem(
-          BUY_NOW_KEY,
-          JSON.stringify(data)
-        )
-
-        setBuyNowData(data)
-        setCheckoutReady(true)
-        return
-      }
-
-      /*
-       * BUY NOW FROM LOCAL STORAGE
-       */
-      const saved =
-        localStorage.getItem(
-          BUY_NOW_KEY
-        )
-
-      if (saved) {
-        const parsed =
-          JSON.parse(saved) as BuyNowData
-
-        if (
-          parsed?.productId &&
-          Number(parsed.quantity) > 0
-        ) {
-          setBuyNowData({
-            productId:
-              parsed.productId,
-            quantity:
-              Number(parsed.quantity),
-          })
-
-          setCheckoutReady(true)
-          return
-        }
-      }
-
-      /*
-       * OLD SESSION STORAGE FALLBACK
-       */
-      const old =
-        sessionStorage.getItem(
-          BUY_NOW_KEY
-        )
-
-      if (old) {
-        const parsed =
-          JSON.parse(old) as BuyNowData
-
-        if (
-          parsed?.productId &&
-          Number(parsed.quantity) > 0
-        ) {
-          const data: BuyNowData = {
-            productId:
-              parsed.productId,
-            quantity:
-              Number(parsed.quantity),
-          }
-
-          localStorage.setItem(
-            BUY_NOW_KEY,
-            JSON.stringify(data)
-          )
-
-          setBuyNowData(data)
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Buy Now recovery error:",
-        error
-      )
-    }
-
+    setBuyNowId(productId || null)
+    setBuyNowQuantity(
+      Number.isSafeInteger(rawQuantity) && rawQuantity > 0
+        ? rawQuantity
+        : 1
+    )
     setCheckoutReady(true)
   }, [ready])
 
-  /*
-   * LOADING
-   */
   if (!ready || !checkoutReady) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-background">
@@ -194,78 +96,66 @@ export default function CheckoutPage() {
     )
   }
 
-  /*
-   * CHECKOUT ITEMS
-   */
-  const items = buyNowData
+  // Buy Now: only the product selected in the URL.
+  // Cart checkout: every valid product in the cart.
+  const items: CheckoutItem[] = buyNowId
     ? (() => {
-        const product =
-          products.find(
-            (p) =>
-              p.id ===
-              buyNowData.productId
-          )
+        const product = products.find((p) => p.id === buyNowId)
 
-        if (!product) {
-          return []
-        }
+        if (!product) return []
 
         return [
           {
             ...product,
-            quantity:
-              buyNowData.quantity,
-            total:
-              discountedPrice(
-                product
-              ) *
-              buyNowData.quantity,
+            quantity: buyNowQuantity,
+            total: discountedPrice(product) * buyNowQuantity,
           },
         ]
       })()
     : cart
-        .map((item) => {
-          const product =
-            products.find(
-              (p) =>
-                p.id === item.productId
-            )
+        .map((cartItem) => {
+          const product = products.find(
+            (p) => p.id === cartItem.productId
+          )
 
-          if (!product) {
-            return null
-          }
+          if (!product) return null
 
           return {
             ...product,
-            quantity:
-              item.quantity,
+            quantity: cartItem.quantity,
             total:
-              discountedPrice(
-                product
-              ) *
-              item.quantity,
+              discountedPrice(product) * cartItem.quantity,
           }
         })
-        .filter(Boolean) as Array<
-        (typeof products)[number] & {
-          quantity: number
-          total: number
-        }
-      >
+        .filter((item): item is CheckoutItem => item !== null)
 
-  /*
-   * TOTAL
-   */
-  const checkoutTotal =
-    items.reduce(
-      (sum, item) =>
-        sum + item.total,
-      0
+  const checkoutTotal = items.reduce(
+    (sum, item) => sum + item.total,
+    0
+  )
+
+  // A missing Buy Now product is NOT the same as an empty cart.
+  if (buyNowId && !products.some((p) => p.id === buyNowId)) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6 text-center">
+        <h1 className="text-2xl font-semibold">
+          Product unavailable
+        </h1>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          The selected product could not be found. Please return to the store and try again.
+        </p>
+
+        <Link
+          href="/"
+          className="mt-6 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
+        >
+          Back to Store
+        </Link>
+      </main>
     )
+  }
 
-  /*
-   * EMPTY
-   */
   if (items.length === 0) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6 text-center">
@@ -287,9 +177,6 @@ export default function CheckoutPage() {
     )
   }
 
-  /*
-   * FORM
-   */
   function updateField(
     field: keyof typeof form,
     value: string
@@ -300,15 +187,8 @@ export default function CheckoutPage() {
     }))
   }
 
-  /*
-   * RAZORPAY CONFIG
-   */
-  function getRazorpayConfig(
-    method: PaymentChoice
-  ) {
-    if (method === "online") {
-      return undefined
-    }
+  function getRazorpayConfig(method: PaymentChoice) {
+    if (method === "online") return undefined
 
     const razorpayMethod =
       method === "upi"
@@ -333,110 +213,68 @@ export default function CheckoutPage() {
         blocks: {
           selected: {
             name,
-            instruments: [
-              {
-                method:
-                  razorpayMethod,
-              },
-            ],
+            instruments: [{ method: razorpayMethod }],
           },
         },
-        sequence: [
-          "block.selected",
-        ],
+        sequence: ["block.selected"],
         preferences: {
-          show_default_blocks:
-            false,
+          show_default_blocks: false,
         },
       },
     }
   }
 
-  /*
-   * SAVE ORDER
-   */
-  async function saveOrder(
-    payment: {
-      razorpay_payment_id: string
-      razorpay_order_id: string
-    }
-  ) {
-    const orderId =
-      `order_${Date.now()}`
+  async function saveOrder(payment: {
+    razorpay_payment_id: string
+    razorpay_order_id: string
+  }) {
+    const orderId = `order_${Date.now()}`
 
-    const cleanMobile =
-      form.mobile
-        .replace(/\D/g, "")
-        .slice(-10)
+    const cleanMobile = form.mobile.replace(/\D/g, "").slice(-10)
 
     const order = {
       id: orderId,
-
       createdAt: Date.now(),
 
       items: items.map((item) => ({
         productId: item.id,
         name: item.name,
         image: item.image,
-        price:
-          discountedPrice(item),
+        price: discountedPrice(item),
         quantity: item.quantity,
       })),
 
       amount: checkoutTotal,
 
       address: {
-        fullName:
-          form.fullName,
-        mobile:
-          cleanMobile,
-        address:
-          form.address,
-        city:
-          form.city,
-        state:
-          form.state,
-        pincode:
-          form.pincode,
+        fullName: form.fullName,
+        mobile: cleanMobile,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode,
       },
 
-      paymentMethod:
-        selectedMethod,
-
-      paymentStatus:
-        "paid",
-
-      orderStatus:
-        "Pending",
-
-      razorpayOrderId:
-        payment.razorpay_order_id,
-
-      razorpayPaymentId:
-        payment.razorpay_payment_id,
+      paymentMethod: selectedMethod,
+      paymentStatus: "paid",
+      orderStatus: "Pending",
+      razorpayOrderId: payment.razorpay_order_id,
+      razorpayPaymentId: payment.razorpay_payment_id,
     }
 
-    const saveResponse =
-      await fetch(
-        "/api/orders",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body:
-            JSON.stringify(order),
-        }
-      )
+    const saveResponse = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    })
 
-    const saveData =
-      await saveResponse.json()
+    const saveData = await saveResponse.json()
 
     if (!saveResponse.ok) {
       throw new Error(
-        saveData?.error ||
-          "Order could not be saved"
+        saveData?.error || "Order could not be saved"
       )
     }
 
@@ -447,36 +285,15 @@ export default function CheckoutPage() {
 
     addOrder(order as any)
 
-    /*
-     * Only normal cart checkout
-     * clears the cart.
-     */
-    if (!buyNowData) {
+    // Only cart checkout clears the cart.
+    // Buy Now never changes the existing cart.
+    if (!buyNowId) {
       clearCart()
-    }
-
-    /*
-     * Remove Buy Now data
-     * only after successful order.
-     */
-    try {
-      sessionStorage.removeItem(
-        BUY_NOW_KEY
-      )
-
-      localStorage.removeItem(
-        BUY_NOW_KEY
-      )
-    } catch {
-      // ignore
     }
 
     return order
   }
 
-  /*
-   * PAYMENT
-   */
   async function handlePayment() {
     if (
       !form.fullName.trim() ||
@@ -486,282 +303,181 @@ export default function CheckoutPage() {
       !form.state.trim() ||
       !form.pincode.trim()
     ) {
-      alert(
-        "Please fill all delivery details."
-      )
+      alert("Please fill all delivery details.")
       return
     }
 
-    const cleanMobile =
-      form.mobile
-        .replace(/\D/g, "")
-        .slice(-10)
+    const cleanMobile = form.mobile.replace(/\D/g, "").slice(-10)
 
-    if (
-      cleanMobile.length !== 10
-    ) {
-      alert(
-        "Please enter a valid 10 digit mobile number."
-      )
+    if (cleanMobile.length !== 10) {
+      alert("Please enter a valid 10 digit mobile number.")
+      return
+    }
+
+    if (!/^\d{6}$/.test(form.pincode.trim())) {
+      alert("Please enter a valid 6 digit PIN code.")
       return
     }
 
     if (checkoutTotal <= 0) {
-      alert(
-        "Invalid order amount."
-      )
+      alert("Invalid order amount.")
       return
     }
 
     try {
       setLoading(true)
 
-      /*
-       * CREATE RAZORPAY ORDER
-       */
-      const response =
-        await fetch(
-          "/api/razorpay/order",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-            body:
-              JSON.stringify({
-                amount:
-                  checkoutTotal,
-              }),
-          }
-        )
+      const response = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: checkoutTotal,
+        }),
+      })
 
-      const data =
-        await response.json()
+      const data = await response.json()
 
       if (!response.ok) {
         throw new Error(
-          data?.error ||
-            "Unable to create payment order"
+          data?.error || "Unable to create payment order"
         )
       }
 
       if (!data.keyId) {
-        throw new Error(
-          "Razorpay key is not configured"
-        )
+        throw new Error("Razorpay key is not configured")
       }
 
-      /*
-       * OPEN RAZORPAY
-       */
       const openCheckout = () => {
         if (!window.Razorpay) {
           setLoading(false)
-
-          alert(
-            "Razorpay could not be loaded."
-          )
-
+          alert("Razorpay could not be loaded.")
           return
         }
 
-        const checkout =
-          new window.Razorpay({
-            key: data.keyId,
+        const checkout = new window.Razorpay({
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency || "INR",
+          name: "TimeHub",
+          description: "Luxury Timepiece",
+          order_id: data.orderId,
 
-            amount:
-              data.amount,
+          config: getRazorpayConfig(selectedMethod),
 
-            currency:
-              data.currency ||
-              "INR",
+          prefill: {
+            name: form.fullName,
+            contact: cleanMobile,
+          },
 
-            name: "TimeHub",
+          notes: {
+            customer_name: form.fullName,
+            mobile: cleanMobile,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            pincode: form.pincode,
+            payment_method: selectedMethod,
+            checkout_type: buyNowId ? "buy_now" : "cart",
+          },
 
-            description:
-              "Luxury Timepiece",
+          theme: {
+            color: "#f2b84b",
+          },
 
-            order_id:
-              data.orderId,
-
-            config:
-              getRazorpayConfig(
-                selectedMethod
-              ),
-
-            prefill: {
-              name:
-                form.fullName,
-              contact:
-                cleanMobile,
-            },
-
-            notes: {
-              customer_name:
-                form.fullName,
-
-              mobile:
-                cleanMobile,
-
-              address:
-                form.address,
-
-              city:
-                form.city,
-
-              state:
-                form.state,
-
-              pincode:
-                form.pincode,
-
-              payment_method:
-                selectedMethod,
-
-              checkout_type:
-                buyNowData
-                  ? "buy_now"
-                  : "cart",
-            },
-
-            theme: {
-              color: "#f2b84b",
-            },
-
-            handler:
-              async function (
-                payment: {
-                  razorpay_payment_id: string
-                  razorpay_order_id: string
-                  razorpay_signature: string
-                }
-              ) {
-                try {
-                  /*
-                   * VERIFY PAYMENT
-                   */
-                  const verifyResponse =
-                    await fetch(
-                      "/api/razorpay/verify",
-                      {
-                        method:
-                          "POST",
-                        headers: {
-                          "Content-Type":
-                            "application/json",
-                        },
-                        body:
-                          JSON.stringify({
-                            razorpay_payment_id:
-                              payment.razorpay_payment_id,
-
-                            razorpay_order_id:
-                              payment.razorpay_order_id,
-
-                            razorpay_signature:
-                              payment.razorpay_signature,
-                          }),
-                      }
-                    )
-
-                  const verifyData =
-                    await verifyResponse.json()
-
-                  if (
-                    !verifyResponse.ok
-                  ) {
-                    throw new Error(
-                      verifyData?.error ||
-                        "Payment verification failed"
-                    )
-                  }
-
-                  /*
-                   * SAVE ORDER
-                   */
-                  await saveOrder({
+          handler: async function (payment: {
+            razorpay_payment_id: string
+            razorpay_order_id: string
+            razorpay_signature: string
+          }) {
+            try {
+              const verifyResponse = await fetch(
+                "/api/razorpay/verify",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
                     razorpay_payment_id:
                       payment.razorpay_payment_id,
-
                     razorpay_order_id:
                       payment.razorpay_order_id,
-                  })
-
-                  /*
-                   * SUCCESS
-                   */
-                  window.location.href =
-                    "/?payment=success"
-                } catch (error) {
-                  console.error(
-                    "Payment success handling error:",
-                    error
-                  )
-
-                  alert(
-                    error instanceof Error
-                      ? error.message
-                      : "Payment completed but order could not be saved."
-                  )
-
-                  setLoading(false)
+                    razorpay_signature:
+                      payment.razorpay_signature,
+                  }),
                 }
-              },
+              )
 
-            modal: {
-              ondismiss:
-                function () {
-                  setLoading(false)
-                },
+              const verifyData = await verifyResponse.json()
+
+              if (!verifyResponse.ok) {
+                throw new Error(
+                  verifyData?.error ||
+                    "Payment verification failed"
+                )
+              }
+
+              await saveOrder({
+                razorpay_payment_id:
+                  payment.razorpay_payment_id,
+                razorpay_order_id:
+                  payment.razorpay_order_id,
+              })
+
+              window.location.href = "/?payment=success"
+            } catch (error) {
+              console.error(
+                "Payment success handling error:",
+                error
+              )
+
+              alert(
+                error instanceof Error
+                  ? error.message
+                  : "Payment completed but order could not be saved."
+              )
+
+              setLoading(false)
+            }
+          },
+
+          modal: {
+            ondismiss: function () {
+              setLoading(false)
             },
-          })
+          },
+        })
 
         checkout.open()
       }
 
-      /*
-       * LOAD RAZORPAY SCRIPT
-       */
-      const existingScript =
-        document.querySelector(
-          'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
-        )
+      const existingScript = document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      )
 
       if (existingScript) {
         openCheckout()
         return
       }
 
-      const script =
-        document.createElement(
-          "script"
-        )
+      const script = document.createElement("script")
 
       script.src =
         "https://checkout.razorpay.com/v1/checkout.js"
 
       script.async = true
-
-      script.onload =
-        openCheckout
+      script.onload = openCheckout
 
       script.onerror = () => {
         setLoading(false)
-
-        alert(
-          "Unable to load Razorpay."
-        )
+        alert("Unable to load Razorpay.")
       }
 
-      document.body.appendChild(
-        script
-      )
+      document.body.appendChild(script)
     } catch (error) {
-      console.error(
-        "Payment error:",
-        error
-      )
+      console.error("Payment error:", error)
 
       setLoading(false)
 
@@ -773,44 +489,35 @@ export default function CheckoutPage() {
     }
   }
 
-  /*
-   * PAYMENT OPTIONS
-   */
   const paymentOptions = [
     {
       id: "upi" as const,
       title: "UPI",
-      description:
-        "Google Pay, PhonePe, Paytm & more",
+      description: "Google Pay, PhonePe, Paytm & more",
       icon: Smartphone,
     },
     {
       id: "netbanking" as const,
       title: "Net Banking",
-      description:
-        "Pay through your bank",
+      description: "Pay through your bank",
       icon: Landmark,
     },
     {
       id: "card" as const,
-      title:
-        "Debit / Credit Card",
-      description:
-        "Visa, Mastercard & more",
+      title: "Debit / Credit Card",
+      description: "Visa, Mastercard & more",
       icon: CreditCard,
     },
     {
       id: "emi" as const,
       title: "EMI",
-      description:
-        "Available eligible EMI options",
+      description: "Available eligible EMI options",
       icon: Banknote,
     },
     {
       id: "online" as const,
       title: "Online Payment",
-      description:
-        "View all available Razorpay methods",
+      description: "View all available Razorpay methods",
       icon: WalletCards,
     },
   ]
@@ -830,7 +537,6 @@ export default function CheckoutPage() {
             <p className="text-xs text-muted-foreground">
               TimeHub
             </p>
-
             <h1 className="text-lg font-semibold">
               Checkout
             </h1>
@@ -867,9 +573,7 @@ export default function CheckoutPage() {
                 </p>
 
                 <p className="mt-2 text-sm font-semibold">
-                  {formatINR(
-                    item.total
-                  )}
+                  {formatINR(item.total)}
                 </p>
               </div>
             </div>
@@ -880,11 +584,8 @@ export default function CheckoutPage() {
           <span className="text-sm text-muted-foreground">
             Total Amount
           </span>
-
           <span className="text-xl font-semibold">
-            {formatINR(
-              checkoutTotal
-            )}
+            {formatINR(checkoutTotal)}
           </span>
         </div>
       </section>
@@ -898,39 +599,33 @@ export default function CheckoutPage() {
           <input
             value={form.fullName}
             onChange={(e) =>
-              updateField(
-                "fullName",
-                e.target.value
-              )
+              updateField("fullName", e.target.value)
             }
             placeholder="Full Name"
+            autoComplete="name"
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
 
           <input
             value={form.mobile}
             onChange={(e) =>
-              updateField(
-                "mobile",
-                e.target.value
-              )
+              updateField("mobile", e.target.value)
             }
             placeholder="Mobile Number"
             inputMode="numeric"
             maxLength={10}
+            autoComplete="tel"
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
 
           <textarea
             value={form.address}
             onChange={(e) =>
-              updateField(
-                "address",
-                e.target.value
-              )
+              updateField("address", e.target.value)
             }
             placeholder="Full Address"
             rows={3}
+            autoComplete="street-address"
             className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
 
@@ -938,24 +633,20 @@ export default function CheckoutPage() {
             <input
               value={form.city}
               onChange={(e) =>
-                updateField(
-                  "city",
-                  e.target.value
-                )
+                updateField("city", e.target.value)
               }
               placeholder="City"
+              autoComplete="address-level2"
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
             />
 
             <input
               value={form.state}
               onChange={(e) =>
-                updateField(
-                  "state",
-                  e.target.value
-                )
+                updateField("state", e.target.value)
               }
               placeholder="State"
+              autoComplete="address-level1"
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
             />
           </div>
@@ -963,14 +654,12 @@ export default function CheckoutPage() {
           <input
             value={form.pincode}
             onChange={(e) =>
-              updateField(
-                "pincode",
-                e.target.value
-              )
+              updateField("pincode", e.target.value)
             }
             placeholder="PIN Code"
             inputMode="numeric"
             maxLength={6}
+            autoComplete="postal-code"
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:border-primary"
           />
         </div>
@@ -986,78 +675,64 @@ export default function CheckoutPage() {
         </p>
 
         <div className="mt-4 space-y-3">
-          {paymentOptions.map(
-            (option) => {
-              const Icon =
-                option.icon
+          {paymentOptions.map((option) => {
+            const Icon = option.icon
+            const selected = selectedMethod === option.id
 
-              const selected =
-                selectedMethod ===
-                option.id
-
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  disabled={loading}
-                  onClick={() =>
-                    setSelectedMethod(
-                      option.id
-                    )
-                  }
-                  className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+            return (
+              <button
+                key={option.id}
+                type="button"
+                disabled={loading}
+                onClick={() => setSelectedMethod(option.id)}
+                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                  selected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card"
+                }`}
+              >
+                <div
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
                     selected
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-card"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary"
                   }`}
                 >
-                  <div
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
-                      selected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    <Icon className="size-5" />
-                  </div>
+                  <Icon className="size-5" />
+                </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
-                      {option.title}
-                    </p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {option.title}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {option.description}
+                  </p>
+                </div>
 
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {option.description}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`size-5 rounded-full border-2 ${
-                      selected
-                        ? "border-primary bg-primary"
-                        : "border-muted-foreground"
-                    }`}
-                  >
-                    {selected && (
-                      <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
-                    )}
-                  </div>
-                </button>
-              )
-            }
-          )}
+                <div
+                  className={`size-5 rounded-full border-2 ${
+                    selected
+                      ? "border-primary bg-primary"
+                      : "border-muted-foreground"
+                  }`}
+                >
+                  {selected && (
+                    <div className="m-1 size-1.5 rounded-full bg-primary-foreground" />
+                  )}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </section>
 
       <section className="px-4 pt-6">
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
           <ShieldCheck className="size-5 shrink-0 text-primary" />
-
           <span>
-            Secure payment powered by
-            Razorpay. Your payment
-            details are handled by
-            Razorpay.
+            Secure payment powered by Razorpay. Your payment
+            details are handled by Razorpay.
           </span>
         </div>
       </section>
@@ -1071,9 +746,7 @@ export default function CheckoutPage() {
         >
           {loading
             ? "Opening Razorpay..."
-            : `Pay ${formatINR(
-                checkoutTotal
-              )}`}
+            : `Pay ${formatINR(checkoutTotal)}`}
         </button>
       </section>
     </main>
