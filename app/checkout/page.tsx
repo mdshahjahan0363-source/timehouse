@@ -50,14 +50,8 @@ export default function CheckoutPage() {
     clearCart,
   } = useStore()
 
-  const [loading, setLoading] =
-    useState(false)
-
-  const [
-    checkoutReady,
-    setCheckoutReady,
-  ] = useState(false)
-
+  const [loading, setLoading] = useState(false)
+  const [checkoutReady, setCheckoutReady] = useState(false)
   const [buyNowData, setBuyNowData] =
     useState<BuyNowData | null>(null)
 
@@ -74,13 +68,12 @@ export default function CheckoutPage() {
   })
 
   /*
-   * BUY NOW / CART CHECKOUT
+   * BUY NOW DATA
    *
-   * Buy Now:
-   * /checkout?buyNow=PRODUCT_ID&quantity=1
-   *
-   * Normal Cart:
-   * /checkout
+   * Priority:
+   * 1. URL
+   * 2. localStorage
+   * 3. old sessionStorage
    */
   useEffect(() => {
     if (!ready) return
@@ -93,37 +86,43 @@ export default function CheckoutPage() {
       const urlProductId =
         params.get("buyNow")
 
-      const urlQuantity = Number(
-        params.get("quantity") || "1"
+      const urlQuantity = Math.max(
+        1,
+        Number(
+          params.get("quantity") || "1"
+        )
       )
 
       /*
        * BUY NOW FROM URL
        */
-      if (
-        urlProductId &&
-        urlQuantity > 0
-      ) {
-        setBuyNowData({
+      if (urlProductId) {
+        const data: BuyNowData = {
           productId: urlProductId,
           quantity: urlQuantity,
-        })
+        }
 
+        localStorage.setItem(
+          BUY_NOW_KEY,
+          JSON.stringify(data)
+        )
+
+        setBuyNowData(data)
         setCheckoutReady(true)
         return
       }
 
       /*
-       * OLD SESSION STORAGE FALLBACK
+       * BUY NOW FROM LOCAL STORAGE
        */
-      const raw =
-        sessionStorage.getItem(
+      const saved =
+        localStorage.getItem(
           BUY_NOW_KEY
         )
 
-      if (raw) {
+      if (saved) {
         const parsed =
-          JSON.parse(raw) as BuyNowData
+          JSON.parse(saved) as BuyNowData
 
         if (
           parsed?.productId &&
@@ -135,11 +134,46 @@ export default function CheckoutPage() {
             quantity:
               Number(parsed.quantity),
           })
+
+          setCheckoutReady(true)
+          return
+        }
+      }
+
+      /*
+       * OLD SESSION STORAGE FALLBACK
+       */
+      const old =
+        sessionStorage.getItem(
+          BUY_NOW_KEY
+        )
+
+      if (old) {
+        const parsed =
+          JSON.parse(old) as BuyNowData
+
+        if (
+          parsed?.productId &&
+          Number(parsed.quantity) > 0
+        ) {
+          const data: BuyNowData = {
+            productId:
+              parsed.productId,
+            quantity:
+              Number(parsed.quantity),
+          }
+
+          localStorage.setItem(
+            BUY_NOW_KEY,
+            JSON.stringify(data)
+          )
+
+          setBuyNowData(data)
         }
       }
     } catch (error) {
       console.error(
-        "Buy Now data error:",
+        "Buy Now recovery error:",
         error
       )
     }
@@ -148,13 +182,9 @@ export default function CheckoutPage() {
   }, [ready])
 
   /*
-   * WAIT UNTIL STORE + CHECKOUT
-   * DATA IS READY
+   * LOADING
    */
-  if (
-    !ready ||
-    !checkoutReady
-  ) {
+  if (!ready || !checkoutReady) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">
@@ -165,13 +195,7 @@ export default function CheckoutPage() {
   }
 
   /*
-   * BUILD CHECKOUT ITEMS
-   *
-   * BUY NOW:
-   * Only selected product
-   *
-   * NORMAL CHECKOUT:
-   * Cart products
+   * CHECKOUT ITEMS
    */
   const items = buyNowData
     ? (() => {
@@ -204,8 +228,7 @@ export default function CheckoutPage() {
           const product =
             products.find(
               (p) =>
-                p.id ===
-                item.productId
+                p.id === item.productId
             )
 
           if (!product) {
@@ -241,7 +264,7 @@ export default function CheckoutPage() {
     )
 
   /*
-   * EMPTY CHECKOUT
+   * EMPTY
    */
   if (items.length === 0) {
     return (
@@ -278,7 +301,7 @@ export default function CheckoutPage() {
   }
 
   /*
-   * RAZORPAY PAYMENT METHOD
+   * RAZORPAY CONFIG
    */
   function getRazorpayConfig(
     method: PaymentChoice
@@ -425,20 +448,23 @@ export default function CheckoutPage() {
     addOrder(order as any)
 
     /*
-     * ONLY NORMAL CART CHECKOUT
-     * CLEARS CART.
-     *
-     * BUY NOW DOES NOT CLEAR CART.
+     * Only normal cart checkout
+     * clears the cart.
      */
     if (!buyNowData) {
       clearCart()
     }
 
     /*
-     * Remove old Buy Now storage
+     * Remove Buy Now data
+     * only after successful order.
      */
     try {
       sessionStorage.removeItem(
+        BUY_NOW_KEY
+      )
+
+      localStorage.removeItem(
         BUY_NOW_KEY
       )
     } catch {
@@ -603,9 +629,6 @@ export default function CheckoutPage() {
               color: "#f2b84b",
             },
 
-            /*
-             * PAYMENT SUCCESS
-             */
             handler:
               async function (
                 payment: {
@@ -698,7 +721,7 @@ export default function CheckoutPage() {
       }
 
       /*
-       * LOAD RAZORPAY SCRIPT ONLY ONCE
+       * LOAD RAZORPAY SCRIPT
        */
       const existingScript =
         document.querySelector(
