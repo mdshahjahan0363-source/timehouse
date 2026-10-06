@@ -53,13 +53,11 @@ export default function CheckoutPage() {
   const [loading, setLoading] =
     useState(false)
 
-  const [
-    checkoutReady,
-    setCheckoutReady,
-  ] = useState(false)
-
   const [buyNowData, setBuyNowData] =
     useState<BuyNowData | null>(null)
+
+  const [buyNowChecked, setBuyNowChecked] =
+    useState(false)
 
   const [selectedMethod, setSelectedMethod] =
     useState<PaymentChoice>("online")
@@ -73,18 +71,15 @@ export default function CheckoutPage() {
     pincode: "",
   })
 
-  // --------------------------------
-  // CHECK FOR BUY NOW
-  // --------------------------------
-
+  /*
+   * READ BUY NOW DATA
+   */
   useEffect(() => {
     if (!ready) return
 
     try {
       const raw =
-        sessionStorage.getItem(
-          BUY_NOW_KEY
-        )
+        sessionStorage.getItem(BUY_NOW_KEY)
 
       if (raw) {
         const parsed =
@@ -95,24 +90,27 @@ export default function CheckoutPage() {
           Number(parsed.quantity) > 0
         ) {
           setBuyNowData({
-            productId:
-              parsed.productId,
-            quantity:
-              Number(parsed.quantity),
+            productId: parsed.productId,
+            quantity: Number(
+              parsed.quantity,
+            ),
           })
         }
       }
     } catch (error) {
       console.error(
         "Buy Now data error:",
-        error
+        error,
       )
     }
 
-    setCheckoutReady(true)
+    setBuyNowChecked(true)
   }, [ready])
 
-  if (!ready || !checkoutReady) {
+  /*
+   * WAIT ONLY FOR LOCAL STORE + PRODUCTS
+   */
+  if (!ready || !buyNowChecked) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">
@@ -122,28 +120,25 @@ export default function CheckoutPage() {
     )
   }
 
-  // --------------------------------
-  // BUILD CHECKOUT ITEMS
-  //
-  // Buy Now:
-  // ONLY selected product
-  //
-  // Normal checkout:
-  // ALL cart products
-  // --------------------------------
-
+  /*
+   * BUILD CHECKOUT ITEMS
+   *
+   * Buy Now:
+   * only selected product
+   *
+   * Normal checkout:
+   * all cart products
+   */
   const items = buyNowData
     ? (() => {
         const product =
           products.find(
             (p) =>
               p.id ===
-              buyNowData.productId
+              buyNowData.productId,
           )
 
-        if (!product) {
-          return []
-        }
+        if (!product) return []
 
         return [
           {
@@ -151,9 +146,7 @@ export default function CheckoutPage() {
             quantity:
               buyNowData.quantity,
             total:
-              discountedPrice(
-                product
-              ) *
+              discountedPrice(product) *
               buyNowData.quantity,
           },
         ]
@@ -163,21 +156,17 @@ export default function CheckoutPage() {
           const product =
             products.find(
               (p) =>
-                p.id === item.productId
+                p.id ===
+                item.productId,
             )
 
-          if (!product) {
-            return null
-          }
+          if (!product) return null
 
           return {
             ...product,
-            quantity:
-              item.quantity,
+            quantity: item.quantity,
             total:
-              discountedPrice(
-                product
-              ) *
+              discountedPrice(product) *
               item.quantity,
           }
         })
@@ -188,21 +177,19 @@ export default function CheckoutPage() {
         }
       >
 
-  // --------------------------------
-  // CHECKOUT TOTAL
-  // --------------------------------
-
+  /*
+   * CHECKOUT TOTAL
+   */
   const checkoutTotal =
     items.reduce(
       (sum, item) =>
         sum + item.total,
-      0
+      0,
     )
 
-  // --------------------------------
-  // EMPTY CHECKOUT
-  // --------------------------------
-
+  /*
+   * EMPTY CHECKOUT
+   */
   if (items.length === 0) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6 text-center">
@@ -224,13 +211,12 @@ export default function CheckoutPage() {
     )
   }
 
-  // --------------------------------
-  // FORM UPDATE
-  // --------------------------------
-
+  /*
+   * FORM UPDATE
+   */
   function updateField(
     field: keyof typeof form,
-    value: string
+    value: string,
   ) {
     setForm((current) => ({
       ...current,
@@ -238,12 +224,11 @@ export default function CheckoutPage() {
     }))
   }
 
-  // --------------------------------
-  // RAZORPAY METHOD
-  // --------------------------------
-
+  /*
+   * RAZORPAY METHOD CONFIG
+   */
   function getRazorpayConfig(
-    method: PaymentChoice
+    method: PaymentChoice,
   ) {
     if (method === "online") {
       return undefined
@@ -291,15 +276,14 @@ export default function CheckoutPage() {
     }
   }
 
-  // --------------------------------
-  // SAVE ORDER
-  // --------------------------------
-
+  /*
+   * SAVE ORDER
+   */
   async function saveOrder(
     payment: {
       razorpay_payment_id: string
       razorpay_order_id: string
-    }
+    },
   ) {
     const orderId =
       `order_${Date.now()}`
@@ -367,7 +351,7 @@ export default function CheckoutPage() {
           },
           body:
             JSON.stringify(order),
-        }
+        },
       )
 
     const saveData =
@@ -376,35 +360,37 @@ export default function CheckoutPage() {
     if (!saveResponse.ok) {
       throw new Error(
         saveData?.error ||
-          "Order could not be saved"
+          "Order could not be saved",
       )
     }
 
     localStorage.setItem(
       "timehouse_customer_mobile",
-      cleanMobile
+      cleanMobile,
     )
 
+    /*
+     * Update local order state.
+     */
     addOrder(order as any)
 
-    // --------------------------------
-    // IMPORTANT
-    //
-    // Buy Now:
-    // DO NOT clear cart
-    //
-    // Normal cart checkout:
-    // Clear cart
-    // --------------------------------
-
+    /*
+     * Normal cart checkout:
+     * clear cart.
+     *
+     * Buy Now:
+     * keep existing cart untouched.
+     */
     if (!buyNowData) {
       clearCart()
     }
 
-    // Remove temporary Buy Now
+    /*
+     * Remove temporary Buy Now data.
+     */
     try {
       sessionStorage.removeItem(
-        BUY_NOW_KEY
+        BUY_NOW_KEY,
       )
     } catch {
       // ignore
@@ -413,10 +399,9 @@ export default function CheckoutPage() {
     return order
   }
 
-  // --------------------------------
-  // PAYMENT
-  // --------------------------------
-
+  /*
+   * PAYMENT
+   */
   async function handlePayment() {
     if (
       !form.fullName.trim() ||
@@ -427,7 +412,7 @@ export default function CheckoutPage() {
       !form.pincode.trim()
     ) {
       alert(
-        "Please fill all delivery details."
+        "Please fill all delivery details.",
       )
       return
     }
@@ -441,14 +426,14 @@ export default function CheckoutPage() {
       cleanMobile.length !== 10
     ) {
       alert(
-        "Please enter a valid 10 digit mobile number."
+        "Please enter a valid 10 digit mobile number.",
       )
       return
     }
 
     if (checkoutTotal <= 0) {
       alert(
-        "Invalid order amount."
+        "Invalid order amount.",
       )
       return
     }
@@ -456,6 +441,9 @@ export default function CheckoutPage() {
     try {
       setLoading(true)
 
+      /*
+       * Create Razorpay order.
+       */
       const response =
         await fetch(
           "/api/razorpay/order",
@@ -470,7 +458,7 @@ export default function CheckoutPage() {
                 amount:
                   checkoutTotal,
               }),
-          }
+          },
         )
 
       const data =
@@ -479,22 +467,25 @@ export default function CheckoutPage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "Unable to create payment order"
+            "Unable to create payment order",
         )
       }
 
       if (!data.keyId) {
         throw new Error(
-          "Razorpay key is not configured"
+          "Razorpay key is not configured",
         )
       }
 
+      /*
+       * Open Razorpay.
+       */
       const openCheckout = () => {
         if (!window.Razorpay) {
           setLoading(false)
 
           alert(
-            "Razorpay could not be loaded."
+            "Razorpay could not be loaded.",
           )
 
           return
@@ -504,14 +495,13 @@ export default function CheckoutPage() {
           new window.Razorpay({
             key: data.keyId,
 
-            amount:
-              data.amount,
+            amount: data.amount,
 
             currency:
               data.currency ||
               "INR",
 
-            name: "AURELIA",
+            name: "TimeHub",
 
             description:
               "Luxury Timepiece",
@@ -521,12 +511,13 @@ export default function CheckoutPage() {
 
             config:
               getRazorpayConfig(
-                selectedMethod
+                selectedMethod,
               ),
 
             prefill: {
               name:
                 form.fullName,
+
               contact:
                 cleanMobile,
             },
@@ -569,20 +560,24 @@ export default function CheckoutPage() {
                   razorpay_payment_id: string
                   razorpay_order_id: string
                   razorpay_signature: string
-                }
+                },
               ) {
                 try {
-                  // Verify payment
+                  /*
+                   * Verify payment.
+                   */
                   const verifyResponse =
                     await fetch(
                       "/api/razorpay/verify",
                       {
                         method:
                           "POST",
+
                         headers: {
                           "Content-Type":
                             "application/json",
                         },
+
                         body:
                           JSON.stringify({
                             razorpay_payment_id:
@@ -594,7 +589,7 @@ export default function CheckoutPage() {
                             razorpay_signature:
                               payment.razorpay_signature,
                           }),
-                      }
+                      },
                     )
 
                   const verifyData =
@@ -605,11 +600,13 @@ export default function CheckoutPage() {
                   ) {
                     throw new Error(
                       verifyData?.error ||
-                        "Payment verification failed"
+                        "Payment verification failed",
                     )
                   }
 
-                  // Save order
+                  /*
+                   * Save successful order.
+                   */
                   await saveOrder({
                     razorpay_payment_id:
                       payment.razorpay_payment_id,
@@ -618,19 +615,21 @@ export default function CheckoutPage() {
                       payment.razorpay_order_id,
                   })
 
-                  // Success
+                  /*
+                   * Payment successful.
+                   */
                   window.location.href =
                     "/?payment=success"
                 } catch (error) {
                   console.error(
                     "Payment success handling error:",
-                    error
+                    error,
                   )
 
                   alert(
                     error instanceof Error
                       ? error.message
-                      : "Payment completed but order could not be saved."
+                      : "Payment completed but order could not be saved.",
                   )
 
                   setLoading(false)
@@ -648,9 +647,12 @@ export default function CheckoutPage() {
         checkout.open()
       }
 
+      /*
+       * Load Razorpay only once.
+       */
       const existingScript =
         document.querySelector(
-          'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+          'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
         )
 
       if (existingScript) {
@@ -660,7 +662,7 @@ export default function CheckoutPage() {
 
       const script =
         document.createElement(
-          "script"
+          "script",
         )
 
       script.src =
@@ -675,17 +677,17 @@ export default function CheckoutPage() {
         setLoading(false)
 
         alert(
-          "Unable to load Razorpay."
+          "Unable to load Razorpay.",
         )
       }
 
       document.body.appendChild(
-        script
+        script,
       )
     } catch (error) {
       console.error(
         "Payment error:",
-        error
+        error,
       )
 
       setLoading(false)
@@ -693,15 +695,14 @@ export default function CheckoutPage() {
       alert(
         error instanceof Error
           ? error.message
-          : "Payment could not be started."
+          : "Payment could not be started.",
       )
     }
   }
 
-  // --------------------------------
-  // PAYMENT OPTIONS
-  // --------------------------------
-
+  /*
+   * PAYMENT OPTIONS
+   */
   const paymentOptions = [
     {
       id: "upi" as const,
@@ -754,7 +755,7 @@ export default function CheckoutPage() {
 
           <div>
             <p className="text-xs text-muted-foreground">
-              AURELIA
+              TimeHub
             </p>
 
             <h1 className="text-lg font-semibold">
@@ -794,7 +795,7 @@ export default function CheckoutPage() {
 
                 <p className="mt-2 text-sm font-semibold">
                   {formatINR(
-                    item.total
+                    item.total,
                   )}
                 </p>
               </div>
@@ -809,7 +810,7 @@ export default function CheckoutPage() {
 
           <span className="text-xl font-semibold">
             {formatINR(
-              checkoutTotal
+              checkoutTotal,
             )}
           </span>
         </div>
@@ -826,7 +827,7 @@ export default function CheckoutPage() {
             onChange={(e) =>
               updateField(
                 "fullName",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="Full Name"
@@ -838,7 +839,7 @@ export default function CheckoutPage() {
             onChange={(e) =>
               updateField(
                 "mobile",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="Mobile Number"
@@ -852,7 +853,7 @@ export default function CheckoutPage() {
             onChange={(e) =>
               updateField(
                 "address",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="Full Address"
@@ -866,7 +867,7 @@ export default function CheckoutPage() {
               onChange={(e) =>
                 updateField(
                   "city",
-                  e.target.value
+                  e.target.value,
                 )
               }
               placeholder="City"
@@ -878,7 +879,7 @@ export default function CheckoutPage() {
               onChange={(e) =>
                 updateField(
                   "state",
-                  e.target.value
+                  e.target.value,
                 )
               }
               placeholder="State"
@@ -891,7 +892,7 @@ export default function CheckoutPage() {
             onChange={(e) =>
               updateField(
                 "pincode",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="PIN Code"
@@ -928,7 +929,7 @@ export default function CheckoutPage() {
                   disabled={loading}
                   onClick={() =>
                     setSelectedMethod(
-                      option.id
+                      option.id,
                     )
                   }
                   className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
@@ -970,7 +971,7 @@ export default function CheckoutPage() {
                   </div>
                 </button>
               )
-            }
+            },
           )}
         </div>
       </section>
@@ -998,7 +999,7 @@ export default function CheckoutPage() {
           {loading
             ? "Opening Razorpay..."
             : `Pay ${formatINR(
-                checkoutTotal
+                checkoutTotal,
               )}`}
         </button>
       </section>
