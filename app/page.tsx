@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -25,9 +25,49 @@ import { installPwa } from "@/components/pwa-install"
 
 export default function HomePage() {
   const { products, cartCount, ready } = useStore()
+
   const [menuOpen, setMenuOpen] = useState(false)
   const [installAvailable, setInstallAvailable] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [hasLoadedProducts, setHasLoadedProducts] = useState(false)
 
+  /* --------------------------------
+     PRODUCT LOADING
+  -------------------------------- */
+  useEffect(() => {
+    if (products.length > 0) {
+      setHasLoadedProducts(true)
+    }
+  }, [products])
+
+  /* --------------------------------
+     SEARCH
+  -------------------------------- */
+  const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) {
+      return products
+    }
+
+    return products.filter((product) => {
+      const name = String(product.name || "").toLowerCase()
+      const brand = String(product.brand || "").toLowerCase()
+      const category = String(
+        (product as any).category || ""
+      ).toLowerCase()
+
+      return (
+        name.includes(query) ||
+        brand.includes(query) ||
+        category.includes(query)
+      )
+    })
+  }, [products, searchQuery])
+
+  /* --------------------------------
+     PWA INSTALL
+  -------------------------------- */
   useEffect(() => {
     const handleInstallAvailable = () => {
       setInstallAvailable(true)
@@ -68,6 +108,17 @@ export default function HomePage() {
       setMenuOpen(false)
     }
   }
+
+  /*
+   * Products ko first time load hone tak
+   * loading state rakhenge.
+   *
+   * Isse refresh ke waqt galat:
+   * "No products available"
+   * nahi dikhega.
+   */
+  const isLoadingProducts =
+    !ready || !hasLoadedProducts
 
   return (
     <main className="min-h-screen bg-[#0b0a08] text-white">
@@ -278,13 +329,27 @@ export default function HomePage() {
 
             <div className="flex h-[46px] items-center rounded-[17px] border border-white/15 bg-[#151310] px-4">
 
-              <Search className="mr-3 size-5 text-white/45" />
+              <Search className="mr-3 size-5 shrink-0 text-white/45" />
 
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search watches"
                 className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                autoComplete="off"
               />
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="ml-2 flex size-7 shrink-0 items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white"
+                  aria-label="Clear search"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
 
             </div>
 
@@ -416,28 +481,57 @@ export default function HomePage() {
           </div>
 
           <span className="text-sm text-white/45">
-            {products.length} items
+            {isLoadingProducts
+              ? "Loading..."
+              : `${filteredProducts.length} items`}
           </span>
 
         </div>
 
-        {!ready ? (
+        {/* LOADING */}
+        {isLoadingProducts ? (
 
-          <div className="py-20 text-center text-white/50">
-            Loading collection...
+          <div className="rounded-2xl border border-white/10 py-20 text-center">
+
+            <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-white/15 border-t-[#d8a84e]" />
+
+            <p className="text-sm text-white/50">
+              Loading collection...
+            </p>
+
           </div>
 
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
 
-          <div className="rounded-2xl border border-white/10 py-20 text-center text-white/50">
-            No products available.
+          /* SEARCH RESULT EMPTY */
+          <div className="rounded-2xl border border-white/10 py-20 text-center">
+
+            <Search className="mx-auto mb-4 size-8 text-white/25" />
+
+            <p className="text-sm text-white/50">
+              {searchQuery.trim()
+                ? "No matching watches found."
+                : "No products available."}
+            </p>
+
+            {searchQuery.trim() && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="mt-4 rounded-full bg-[#f2b84b] px-5 py-2 text-xs font-medium text-black"
+              >
+                Show All Watches
+              </button>
+            )}
+
           </div>
 
         ) : (
 
+          /* PRODUCTS */
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 
-            {products.map((product) => {
+            {filteredProducts.map((product) => {
 
               const salePrice =
                 discountedPrice(product)
