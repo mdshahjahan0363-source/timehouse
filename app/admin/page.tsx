@@ -1444,6 +1444,7 @@ function SupportFormModal({
     </div>
   )
 }
+
 function UsersSection({
   users,
   loading,
@@ -1457,11 +1458,14 @@ function UsersSection({
     <section className="p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-serif text-xl text-foreground">Users</h2>
+          <h2 className="font-serif text-xl text-foreground">
+            Users
+          </h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Customer details submitted through the website popup
           </p>
         </div>
+
         <button
           type="button"
           onClick={onRefresh}
@@ -1472,46 +1476,72 @@ function UsersSection({
         </button>
       </div>
 
-      {loading ? (
-        <Spinner label="Loading users..." />
-      ) : users.length === 0 ? (
-        <EmptyState
-          icon={<Users className="size-6" />}
-          title="No users yet"
-          description="Customer details submitted from the popup will appear here."
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[480px] text-left text-sm">
-            <thead className="bg-muted/50">
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[480px] text-left text-sm">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="px-3 py-3 font-semibold">Name</th>
+              <th className="px-3 py-3 font-semibold">Number</th>
+              <th className="px-3 py-3 font-semibold">
+                Date &amp; Time
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
               <tr>
-                <th className="px-3 py-3 font-semibold">Name</th>
-                <th className="px-3 py-3 font-semibold">Number</th>
-                <th className="px-3 py-3 font-semibold">Date &amp; Time</th>
+                <td
+                  colSpan={3}
+                  className="px-3 py-6 text-center text-muted-foreground"
+                >
+                  Loading users...
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="border-t border-border">
-                  <td className="px-3 py-3 font-medium">{user.name || "—"}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{user.mobile || "—"}</td>
+            ) : users.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="px-3 py-6 text-center text-muted-foreground"
+                >
+                  No users yet
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr
+                  key={user.id}
+                  className="border-t border-border"
+                >
+                  <td className="px-3 py-3 font-medium">
+                    {user.name || "—"}
+                  </td>
+
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {user.mobile || "—"}
+                  </td>
+
                   <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
                     {user.dateTime
-                      ? new Date(user.dateTime).toLocaleString("en-IN", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })
+                      ? new Date(user.dateTime).toLocaleString(
+                          "en-IN",
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }
+                        )
                       : "—"}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </section>
   )
 }
+
 
 function SettingsSection() {
   const toast = useToast()
