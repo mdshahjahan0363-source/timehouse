@@ -22,6 +22,7 @@ import {
   Settings,
   Upload,
   ImageIcon,
+  Users,
 } from "lucide-react"
 
 import { useStore } from "@/lib/store"
@@ -66,6 +67,7 @@ type Tab =
   | "orders"
   | "support"
   | "settings"
+  | "users"
 type SiteSettings = {
   siteName: string
   tagline: string
@@ -82,10 +84,11 @@ type SupportOption = {
   updatedAt?: number
 }
 
-type SiteSettings = {
-  siteName: string
-  tagline: string
-  logoUrl: string
+type CustomerUser = {
+  id: string
+  name: string
+  mobile: string
+  dateTime: number
 }
 
 export default function AdminPage() {
@@ -315,6 +318,12 @@ function AdminDashboard({
   const [supportDelete, setSupportDelete] =
     useState<SupportOption | null>(null)
 
+  const [users, setUsers] =
+    useState<CustomerUser[]>([])
+
+  const [usersLoading, setUsersLoading] =
+    useState(false)
+
   const revenue = orders
     .filter(
       (order) =>
@@ -328,10 +337,39 @@ function AdminDashboard({
     )
 
   useEffect(() => {
-    if (tab !== "support") return
+    if (tab === "support") {
+      loadSupport()
+    }
 
-    loadSupport()
+    if (tab === "users") {
+      loadUsers()
+    }
   }, [tab])
+
+  async function loadUsers() {
+    setUsersLoading(true)
+
+    try {
+      const response = await fetch(
+        "/api/admin/customers",
+        { cache: "no-store" },
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to load users",
+        )
+      }
+
+      setUsers(Array.isArray(data.users) ? data.users : [])
+    } catch {
+      toast("Failed to load users", "error")
+    } finally {
+      setUsersLoading(false)
+    }
+  }
 
   async function loadSupport() {
     setSupportLoading(true)
@@ -618,6 +656,14 @@ function AdminDashboard({
               <Settings className="size-4" />
               Settings
             </TabButton>
+
+            <TabButton
+              active={tab === "users"}
+              onClick={() => setTab("users")}
+            >
+              <Users className="size-4" />
+              Users
+            </TabButton>
           </div>
         </div>
       </header>
@@ -655,8 +701,10 @@ function AdminDashboard({
             onDelete={(item) => setSupportDelete(item)}
             onToggle={toggleSupport}
           />
-        ) : (
+        ) : tab === "settings" ? (
           <SettingsSection />
+        ) : (
+          <UsersSection users={users} loading={usersLoading} onRefresh={loadUsers} />
         )}
       </div>
 
@@ -1396,6 +1444,75 @@ function SupportFormModal({
     </div>
   )
 }
+function UsersSection({
+  users,
+  loading,
+  onRefresh,
+}: {
+  users: CustomerUser[]
+  loading: boolean
+  onRefresh: () => void
+}) {
+  return (
+    <section className="p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-xl text-foreground">Users</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Customer details submitted through the website popup
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={loading}
+          className="rounded-lg border border-border px-3 py-2 text-xs font-medium disabled:opacity-50"
+        >
+          {loading ? "Loading..." : "Refresh"}
+        </button>
+      </div>
+
+      {loading ? (
+        <Spinner label="Loading users..." />
+      ) : users.length === 0 ? (
+        <EmptyState
+          icon={<Users className="size-6" />}
+          title="No users yet"
+          description="Customer details submitted from the popup will appear here."
+        />
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full min-w-[480px] text-left text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-3 py-3 font-semibold">Name</th>
+                <th className="px-3 py-3 font-semibold">Number</th>
+                <th className="px-3 py-3 font-semibold">Date &amp; Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} className="border-t border-border">
+                  <td className="px-3 py-3 font-medium">{user.name || "—"}</td>
+                  <td className="whitespace-nowrap px-3 py-3">{user.mobile || "—"}</td>
+                  <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
+                    {user.dateTime
+                      ? new Date(user.dateTime).toLocaleString("en-IN", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function SettingsSection() {
   const toast = useToast()
 
