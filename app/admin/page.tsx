@@ -1456,6 +1456,23 @@ function UsersSection({
 }) {
   return (
     <section className="p-4">
+      
+<div className="mb-4 rounded-xl border border-border bg-card p-4">
+  <div className="flex items-center gap-3">
+    <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <Users className="size-5" />
+    </div>
+    <div>
+      <p className="text-xs text-muted-foreground">
+        Total Users
+      </p>
+      <p className="text-2xl font-semibold text-foreground">
+        {users.length}
+      </p>
+    </div>
+  </div>
+</div>
+
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="font-serif text-xl text-foreground">
